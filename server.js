@@ -6,6 +6,7 @@ const path       = require('path');
 const helmet     = require('helmet');
 const rateLimit  = require('express-rate-limit');
 
+const mongoose     = require('mongoose');
 const config       = require('./config/env');
 const aiRoutes     = require('./routes/aiRoutes');
 const errorHandler = require('./middlewares/errorHandler');
@@ -58,9 +59,13 @@ app.use(express.static(path.join(__dirname, 'frontend')));
 // 6. Health Check — مطلوب لـ Cloud Run Readiness Probe
 // ──────────────────────────────────────────────
 app.get('/health', (_req, res) => {
+    const dbStates = ['disconnected', 'connected', 'connecting', 'disconnecting'];
     res.status(200).json({
         status:    'ok',
         model:     config.GEMINI_MODEL,
+        db:        dbStates[mongoose.connection.readyState] || 'unknown',
+        dbHost:    mongoose.connection.host || null,
+        dbName:    mongoose.connection.name || null,
         timestamp: new Date().toISOString(),
     });
 });

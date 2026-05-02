@@ -51,9 +51,18 @@ const parseJsonFromGemini = (text) => {
 };
 
 // دالة مساعدة لحفظ التقرير في قاعدة البيانات (بدون إيقاف السيرفر في حال فشل الحفظ)
+const READY_STATES = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+
 const saveReportToDB = async (endpoint, inputText, aiResult, options) => {
+    if (!config.MONGO_URI) {
+        console.warn(`⚠️ [${endpoint}] لم يُحفظ — MONGO_URI غير مُعرَّف.`);
+        return null;
+    }
+    if (mongoose.connection.readyState !== 1) {
+        console.warn(`⚠️ [${endpoint}] لم يُحفظ — حالة Mongo: ${READY_STATES[mongoose.connection.readyState] || 'unknown'}`);
+        return null;
+    }
     try {
-        if (!config.MONGO_URI || mongoose.connection.readyState !== 1) return null;
         const report = await Report.create({
             endpoint,
             inputText: inputText || '',
@@ -61,9 +70,10 @@ const saveReportToDB = async (endpoint, inputText, aiResult, options) => {
             language: options?.outputLang || 'auto',
             options: options || {}
         });
+        console.log(`💾 [${endpoint}] تم الحفظ — id: ${report._id}`);
         return report._id;
     } catch (err) {
-        console.error('❌ فشل حفظ التقرير في قاعدة البيانات:', err.message);
+        console.error(`❌ [${endpoint}] فشل الحفظ:`, err.message, err.errors || '');
         return null;
     }
 };
