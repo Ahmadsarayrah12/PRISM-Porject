@@ -96,17 +96,17 @@ export const renderJSONVisuals = (type, data) => {
                         <div class="gauge-fill" style="transform: rotate(${rotation}deg);"></div>
                         <div class="gauge-cover flex items-end justify-center pb-1"><span class="text-xl font-bold text-slate-900 dark:text-white">${score}%</span></div>
                     </div>
-                    <span class="text-slate-500 text-xs mt-2 font-bold uppercase tracking-wider">Bias Index</span>
+                    <span class="text-slate-500 text-xs mt-2 font-bold uppercase tracking-wider">${dict['bias.index']}</span>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold text-slate-900 dark:text-slate-200 mb-2">Detected Terms</h4>
-                    <div class="mb-4">${wordsHtml || '<span class="text-slate-400 text-sm">None detected</span>'}</div>
+                    <h4 class="text-sm font-bold text-slate-900 dark:text-slate-200 mb-2">${dict['bias.detected.terms']}</h4>
+                    <div class="mb-4">${wordsHtml || `<span class="text-slate-400 text-sm">${dict['bias.none.detected']}</span>`}</div>
                     <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed border-l-2 border-slate-200 dark:border-slate-700 pl-3">${data.analysis}</p>
                 </div>
             </div>
         `;
-        
-        elements.resultsContent.innerHTML = `<div class="mt-6"><h3 class="text-sm font-bold text-slate-900 dark:text-white mb-2">Neutral Rewrite</h3><p class="text-slate-600 dark:text-slate-400">${data.neutralRewrite}</p></div>`;
+
+        elements.resultsContent.innerHTML = `<div class="mt-6"><h3 class="text-sm font-bold text-slate-900 dark:text-white mb-2">${dict['bias.neutral.rewrite']}</h3><p class="text-slate-600 dark:text-slate-400">${data.neutralRewrite}</p></div>`;
         showResultsContainer();
     }
     

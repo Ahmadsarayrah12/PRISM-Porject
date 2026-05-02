@@ -2,6 +2,7 @@ import { elements, showToast, hideResults, renderCascadingHTML, renderJSONVisual
 import { selectTool, getCurrentEndpoint } from './toolSelector.js';
 import { processTextAPI, scrapeUrlAPI } from './api.js';
 import { translations, getLanguage } from './i18n.js';
+import { generatePDFReport } from './pdfReport.js';
 
 let isProcessing = false;
 let rawMarkdownForDownload = ''; // لحفظ النتيجة كنص ليتم تصديرها
@@ -179,14 +180,30 @@ elements.copyBtn.addEventListener('click', async () => {
 
 elements.downloadBtn.addEventListener('click', () => {
     if (!rawMarkdownForDownload) return;
-    const blob = new Blob([rawMarkdownForDownload], { type: 'text/markdown;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Prism_${getCurrentEndpoint()}_${new Date().getTime()}.md`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showToast('toast.download.success', 'success');
+    generatePDFReport();
 });
+
+export const loadReport = async (report) => {
+    selectTool(report.endpoint);
+    
+    // وضع النص في المحرر (لو كان موجوداً)
+    if (report.inputText && report.endpoint !== 'audioAnalysis') {
+        elements.newsInput.value = report.inputText;
+        updateCounters(report.inputText);
+    }
+    
+    // استعادة حالة الأزرار والواجهة
+    hideResults();
+    setTimeout(async () => {
+        elements.skeletonContainer.classList.add('hidden');
+        if (report.endpoint === 'bias' || report.endpoint === 'truthGuard') {
+            rawMarkdownForDownload = JSON.stringify(report.aiResult, null, 2);
+            renderJSONVisuals(report.endpoint === 'bias' ? 'json_bias' : 'json_truth', report.aiResult);
+        } else {
+            rawMarkdownForDownload = report.aiResult;
+            const htmlResult = marked.parse(report.aiResult);
+            await renderCascadingHTML(htmlResult);
+        }
+        elements.resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+};

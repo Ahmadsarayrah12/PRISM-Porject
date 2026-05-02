@@ -10,4 +10,6 @@ module.exports = {
     ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN || '*',
     // GCS: اختياري — مطلوب فقط لدعم ملفات الوسائط الأكبر من 10 MB
     GCS_BUCKET:     process.env.GCS_BUCKET     || null,
+    // Database
+    MONGO_URI:      process.env.MONGO_URI      || 'mongodb+srv://ahmadsarayrah1122_db_user:1lLZFEFTD2XwnMW4@ahmad1122.fbre4kv.mongodb.net/prism?appName=ahmad1122',
 };

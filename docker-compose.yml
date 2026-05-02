@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  # خدمة التطبيق الأساسية (Node.js)
+  prism-app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      - MONGO_URI=mongodb://mongodb:27017/prism_db
+      - GEMINI_API_KEY=${GEMINI_API_KEY} # يسحب المفتاح من ملف .env في جهازك
+    depends_on:
+      - mongodb
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+
+  # خدمة قاعدة البيانات (MongoDB)
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - prism-db-data:/data/db # يحفظ البيانات حتى لا تضيع عند إطفاء دوكر
+
+volumes:
+  prism-db-data:

@@ -1,0 +1,17 @@
+{
+  "name": "Prism Media",
+  "short_name": "Prism",
+  "description": "مساحة عمل متقدمة للصحفيين لتدقيق وتحليل الأخبار",
+  "start_url": "./app.html",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "./assets/prism-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

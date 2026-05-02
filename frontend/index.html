@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="page.home.title">Prism | منصة الإعلام الذكي</title>
+    <title data-i18n="page.home.title">PRISM Media | AI-Powered Journalism</title>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#2563eb">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = { darkMode: 'class' };
@@ -105,6 +107,15 @@
     <script type="module">
         import { initSettings } from './js/settings.js';
         initSettings();
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch(err => {
+            console.log('SW registration failed: ', err);
+          });
+        });
+      }
     </script>
 </body>
 </html>

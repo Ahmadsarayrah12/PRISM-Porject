@@ -9,8 +9,14 @@ const rateLimit  = require('express-rate-limit');
 const config       = require('./config/env');
 const aiRoutes     = require('./routes/aiRoutes');
 const errorHandler = require('./middlewares/errorHandler');
+const connectDB    = require('./config/db');
 
 const app = express();
+
+// ──────────────────────────────────────────────
+// Database Connection
+// ──────────────────────────────────────────────
+connectDB();
 
 // ──────────────────────────────────────────────
 // 1. Security Headers
@@ -62,7 +68,10 @@ app.get('/health', (_req, res) => {
 // ──────────────────────────────────────────────
 // 7. API Routes
 // ──────────────────────────────────────────────
+const historyRoutes = require('./routes/historyRoutes');
+
 app.use('/api', apiLimiter, aiRoutes);
+app.use('/api/history', apiLimiter, historyRoutes);
 
 // ──────────────────────────────────────────────
 // 8. Global Error Handler (يجب أن يكون آخر middleware)

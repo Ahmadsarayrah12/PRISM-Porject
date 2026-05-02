@@ -62,7 +62,26 @@ export const translations = {
         "tool.synthesis.title": "غرفة التحرير الذكية (دمج الروايات)",
         "tool.audio.title": "تفريغ وتحليل الوسائط المسموعة والمرئية",
         "placeholder.synthesis": "الصق هنا 2-3 مقالات تغطي نفس الحدث (افصل بينها بمسافة أو خطوط) لدمجها وكشف التناقضات...",
-        "placeholder.url": "أو الصق رابط المقال هنا لجلب النص تلقائياً..."
+        "placeholder.url": "أو الصق رابط المقال هنا لجلب النص تلقائياً...",
+        "history.title": "سجل التقارير",
+        "history.refresh": "تحديث السجل",
+        "history.loading": "جاري التحميل...",
+        "history.empty": "لا يوجد تقارير سابقة",
+        "history.media": "مرفق وسائط",
+        "history.delete.title": "حذف التقرير",
+        "history.error": "خطأ في جلب السجل",
+        "history.confirm.delete": "هل أنت متأكد من حذف هذا التقرير؟",
+        "toast.history.loaded": "تم استرجاع التقرير بنجاح",
+        "toast.history.deleted": "تم الحذف بنجاح",
+        "toast.history.delete.fail": "فشل الحذف",
+        "status.ai.active": "نواة الذكاء نشطة",
+        "bias.index": "مؤشر الانحياز",
+        "bias.detected.terms": "الكلمات المنحازة",
+        "bias.none.detected": "لا شيء مكتشف",
+        "bias.neutral.rewrite": "إعادة الكتابة المحايدة",
+        "truth.fallacies": "المغالطات المكتشفة",
+        "truth.questions": "أسئلة التحقيق",
+        "truth.recommendations": "التوصيات"
     },
     en: {
         "page.home.title": "Prism | Smart Media Platform",
@@ -127,7 +146,26 @@ export const translations = {
         "tool.synthesis.title": "Smart Newsroom (Narrative Synthesis)",
         "tool.audio.title": "Audio/Video Transcription & Analysis",
         "placeholder.synthesis": "Paste 2-3 articles covering the same event here to merge and find contradictions...",
-        "placeholder.url": "Or paste article URL here to auto-extract text..."
+        "placeholder.url": "Or paste article URL here to auto-extract text...",
+        "history.title": "Report History",
+        "history.refresh": "Refresh History",
+        "history.loading": "Loading...",
+        "history.empty": "No previous reports",
+        "history.media": "Media attachment",
+        "history.delete.title": "Delete report",
+        "history.error": "Error fetching history",
+        "history.confirm.delete": "Are you sure you want to delete this report?",
+        "toast.history.loaded": "Report loaded successfully",
+        "toast.history.deleted": "Deleted successfully",
+        "toast.history.delete.fail": "Delete failed",
+        "status.ai.active": "AI Core Active",
+        "bias.index": "Bias Index",
+        "bias.detected.terms": "Detected Terms",
+        "bias.none.detected": "None detected",
+        "bias.neutral.rewrite": "Neutral Rewrite",
+        "truth.fallacies": "Detected Fallacies",
+        "truth.questions": "Investigation Prompts",
+        "truth.recommendations": "Recommendations"
     }
 };
 
@@ -155,6 +193,13 @@ export function applyTranslations(lang) {
         const key = el.getAttribute('data-i18n-placeholder');
         if (dict[key]) {
             el.placeholder = dict[key];
+        }
+    });
+
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const key = el.getAttribute('data-i18n-title');
+        if (dict[key]) {
+            el.title = dict[key];
         }
     });
     
