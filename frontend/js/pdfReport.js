@@ -107,58 +107,83 @@ const buildPrintStyles = (meta) => {
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;900&family=Tajawal:wght@400;500;700&display=swap');
 
 /* ══════════════════════════════════════════════════
-   PRISM PRINT STYLES v4.0  —  True A4 flex layout
+   PRISM PRINT STYLES v4.1  —  Multi-page A4 flex
    ══════════════════════════════════════════════════ */
+
+/* Hide the print wrapper on screen — it's only for the print pass */
+#print-wrapper { display: none; }
 
 @media print {
 
-  /* ── Page geometry ──────────────────────────────── */
+  /* ── Page geometry with running page numbers ────── */
   @page {
     size: A4 portrait;
     margin: ${REPORT_CONFIG.pageMarginV} ${REPORT_CONFIG.pageMarginH};
+
+    @bottom-${blockEnd} {
+      content: counter(page) " / " counter(pages);
+      font-family: ${fontDisplay};
+      font-size: 8pt;
+      color: #94a3b8;
+    }
+
+    @bottom-${blockStart} {
+      content: "${REPORT_CONFIG.brandName}";
+      font-family: ${fontDisplay};
+      font-size: 8pt;
+      font-weight: 700;
+      color: ${REPORT_CONFIG.accentColor};
+      letter-spacing: 1pt;
+    }
   }
 
   @page :first { margin-top: ${REPORT_CONFIG.pageMarginV}; }
 
-  /* ── Hide everything except results ────────────── */
-  html, body {
-    visibility: hidden !important;
-    background: #ffffff !important;
-  }
+  /* ── Hide everything except the print wrapper ──── */
+  /* Use display:none on body's direct children so layout reflows
+     and the print wrapper is the only element painted. This lets
+     the browser paginate the content naturally across pages. */
+  body > *:not(#print-wrapper) { display: none !important; }
 
-  #print-wrapper,
-  #print-wrapper * {
-    visibility: visible !important;
-  }
-
-  /* ── Remove all screen-only chrome ─────────────── */
-  #download-btn, #copy-btn, #share-btn,
+  #download-btn, #copy-btn, #share-btn, #fullscreen-btn,
   .no-print, [data-no-print],
-  nav, header, footer, aside,
-  .sidebar, .toolbar, .action-bar,
   .toast-container, [role="dialog"] {
     display: none !important;
   }
 
-  /* ── Wrapper: fills A4 content area exactly ─────── */
-  #print-wrapper {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+  html, body {
     background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* ── Wrapper: normal flow, lets content paginate ── */
+  #print-wrapper {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    inset: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    overflow: visible !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  /* ── Inner page: flowing column layout ──────────── */
+  /* ── Inner page: natural flow, no height constraint */
   #print-page {
     display: block;
     width: 100%;
-    min-height: 100%;
+    height: auto;
+    min-height: 0;
     font-family: ${fontBody};
     font-size: 10.5pt;
-    line-height: ${isRtl ? '2' : '1.7'};
+    line-height: ${isRtl ? '1.9' : '1.65'};
     color: #0f172a !important;
     direction: ${dir};
     text-align: ${blockStart};
@@ -167,15 +192,15 @@ const buildPrintStyles = (meta) => {
     print-color-adjust: exact;
   }
 
-  /* ── Top accent bar ─────────────────────────────── */
+  /* ── Top accent bar (first page only) ───────────── */
   #print-page::before {
     content: "";
     display: block;
     width: 100%;
-    height: 5px;
+    height: 4pt;
     background: linear-gradient(90deg, ${REPORT_CONFIG.accentColor}, #7c3aed) !important;
-    border-radius: 2px;
-    margin-bottom: 12pt;
+    border-radius: 2pt;
+    margin-bottom: 10pt;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -648,24 +673,22 @@ const buildPrintStyles = (meta) => {
   .prism-callout.warning { background: #fffbeb !important; border-${blockStart}: 3pt solid ${REPORT_CONFIG.warningColor}; }
   .prism-callout.danger  { background: #fef2f2 !important; border-${blockStart}: 3pt solid ${REPORT_CONFIG.dangerColor}; }
 
-  /* ── Footer ─────────────────────────────────────── */
+  /* ── End-of-document footer (last page only) ────── */
   .prism-print-footer {
-    margin-top: 18pt;
-    padding-top: 7pt;
+    margin-top: 24pt;
+    padding-top: 8pt;
     border-top: 0.75pt solid #e2e8f0;
-    display: flex !important;
-    justify-content: space-between;
-    align-items: center;
+    text-align: center;
     font-family: ${fontDisplay};
-    font-size: 7pt;
+    font-size: 7.5pt;
     color: #94a3b8 !important;
     direction: ${dir};
     page-break-inside: avoid;
     break-inside: avoid;
+    page-break-before: avoid;
   }
 
-  .prism-print-footer__text { text-align: center; flex: 1; }
-  .prism-print-footer__page { font-size: 7pt; white-space: nowrap; }
+  .prism-print-footer__text { display: block; }
 
   /* ── Page-break utilities ───────────────────────── */
   .page-break-before { page-break-before: always; break-before: page; }
@@ -706,14 +729,10 @@ const buildPrintHeader = (meta) => {
 };
 
 const buildPrintFooter = (meta) => {
-  const { dir, t } = meta;
+  const { t } = meta;
   const footer = document.createElement('div');
   footer.className = 'prism-print-footer';
-  footer.innerHTML = /* html */ `
-    <span class="prism-print-footer__page">${REPORT_CONFIG.brandName}</span>
-    <span class="prism-print-footer__text">${t.footerText}</span>
-    <span class="prism-print-footer__page"></span>
-  `;
+  footer.innerHTML = `<span class="prism-print-footer__text">${t.footerText}</span>`;
   return footer;
 };
 
