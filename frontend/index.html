@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,10 +21,16 @@
         .dark .glass-panel { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.05); }
         .dark .glass-panel:hover { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(59,130,246,0.3); }
     </style>
-    <!-- Pre-load theme to prevent flash -->
+    <!-- Pre-load theme & language (defaults: dark + en) -->
     <script>
-        if (localStorage.getItem('prism_theme') === 'dark') document.documentElement.classList.add('dark');
-        if (localStorage.getItem('prism_lang') === 'en') { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
+        (function () {
+            var theme = localStorage.getItem('prism_theme') || 'dark';
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+
+            var lang = localStorage.getItem('prism_lang') || 'en';
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        })();
     </script>
 </head>
 <body class="text-slate-900 dark:text-slate-200 bg-slate-50 dark:bg-slate-950 min-h-screen flex flex-col relative overflow-x-hidden selection:bg-blue-500/30">
@@ -33,40 +39,40 @@
     <div class="fixed bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-400/20 dark:bg-purple-600/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
     <div class="relative z-10 flex flex-col min-h-screen">
-        <header class="flex justify-between items-center p-6 md:px-16 md:py-8 max-w-7xl mx-auto w-full">
-            <div class="flex items-center gap-4">
-                <img src="assets/prism-icon.svg" class="w-12 h-12 md:w-16 md:h-16 drop-shadow-md" alt="Prism Logo">
-                <div class="flex flex-col">
-                    <h1 class="text-3xl md:text-4xl font-black tracking-[0.25em] text-slate-900 dark:text-white" style="font-family: 'Montserrat', sans-serif;">PRISM</h1>
-                    <span data-i18n="brand.subtitle" class="text-[10px] md:text-xs text-slate-500 dark:text-slate-400 font-semibold tracking-wider">مؤسسة إعلامية | MEDIA</span>
+        <header class="flex justify-between items-center p-4 sm:p-6 md:px-16 md:py-8 max-w-7xl mx-auto w-full gap-3">
+            <div class="flex items-center gap-2 sm:gap-4 min-w-0">
+                <img src="assets/prism-icon.svg" class="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 drop-shadow-md shrink-0" alt="Prism Logo">
+                <div class="flex flex-col min-w-0">
+                    <h1 class="text-xl sm:text-3xl md:text-4xl font-black tracking-[0.2em] sm:tracking-[0.25em] text-slate-900 dark:text-white truncate" style="font-family: 'Montserrat', sans-serif;">PRISM</h1>
+                    <span data-i18n="brand.subtitle" class="text-[9px] sm:text-[10px] md:text-xs text-slate-500 dark:text-slate-400 font-semibold tracking-wider truncate">MEDIA FOUNDATION | MEDIA</span>
                 </div>
             </div>
-            
-            <div class="flex items-center gap-4">
-                <button onclick="window.toggleLanguage()" class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors font-bold text-sm">
+
+            <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+                <button onclick="window.toggleLanguage()" class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors font-bold text-xs sm:text-sm">
                     EN/AR
                 </button>
                 <button onclick="window.toggleTheme()" class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
                     <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                     <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
                 </button>
-                <a href="app.html" data-i18n="nav.workspace" class="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-200 shadow-sm text-sm font-semibold transition-all hover:shadow-md">مساحة العمل &larr;</a>
+                <a href="app.html" data-i18n="nav.workspace" class="px-3 sm:px-5 py-2 sm:py-2.5 rounded-full bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-200 shadow-sm text-xs sm:text-sm font-semibold transition-all hover:shadow-md whitespace-nowrap">Workspace &rarr;</a>
             </div>
         </header>
 
-        <main class="flex-1 flex flex-col items-center justify-center px-6 text-center max-w-5xl mx-auto w-full">
-            <div data-i18n="home.tag" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-blue-200 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/10 text-xs font-bold text-blue-600 dark:text-blue-300 mb-8 uppercase tracking-widest shadow-sm">
-                الجيل القادم من الإعلام
+        <main class="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 text-center max-w-5xl mx-auto w-full pb-10">
+            <div data-i18n="home.tag" class="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full border border-blue-200 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/10 text-[10px] sm:text-xs font-bold text-blue-600 dark:text-blue-300 mb-6 sm:mb-8 uppercase tracking-widest shadow-sm">
+                Next-Gen Media
             </div>
-            
-            <h2 data-i18n="home.hero.title" class="text-5xl md:text-7xl font-extrabold text-slate-900 dark:text-white mb-6 leading-tight">
-                الصحافة التحليلية، <br> <span class="bg-gradient-to-l from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">مُعاد ابتكارها بالذكاء الاصطناعي.</span>
+
+            <h2 data-i18n="home.hero.title" class="text-3xl sm:text-5xl md:text-7xl font-extrabold text-slate-900 dark:text-white mb-4 sm:mb-6 leading-tight">
+                Analytical Journalism, <br> <span class="bg-gradient-to-l from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">reinvented with AI.</span>
             </h2>
-            <p data-i18n="home.hero.desc" class="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-16 max-w-3xl mx-auto leading-relaxed">
-                منصة متطورة مصممة للغرف الإخبارية الحديثة. دقة متناهية في التلخيص، كشف الانحياز، وتدقيق الحقائق في أجزاء من الثانية.
+            <p data-i18n="home.hero.desc" class="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 sm:mb-16 max-w-3xl mx-auto leading-relaxed">
+                An advanced platform built for modern newsrooms. Pinpoint summarization, bias detection, and fact-checking — in milliseconds.
             </p>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full text-right rtl:text-right ltr:text-left">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full rtl:text-right ltr:text-left">
                 <a href="app.html?tool=summarize" class="glass-panel p-6 rounded-2xl flex flex-col transition-all duration-300 cursor-pointer">
                     <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center mb-5 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20 shadow-sm"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg></div>
                     <h3 data-i18n="tool.summarize.title" class="text-lg font-bold text-slate-900 dark:text-white mb-2">التلخيص الذكي</h3>
@@ -92,16 +98,16 @@
                 </a>
             </div>
             
-            <div class="mt-16">
-                <a href="app.html" class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold px-10 py-4 rounded-full inline-flex items-center gap-3 transition-transform hover:scale-105 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] dark:shadow-[0_0_40px_rgba(255,255,255,0.2)]">
-                    <span data-i18n="home.cta">بدء الاستخدام مجاناً</span>
+            <div class="mt-10 sm:mt-16">
+                <a href="app.html" class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold px-6 sm:px-10 py-3 sm:py-4 rounded-full inline-flex items-center gap-3 text-sm sm:text-base transition-transform hover:scale-105 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] dark:shadow-[0_0_40px_rgba(255,255,255,0.2)]">
+                    <span data-i18n="home.cta">Get Started Free</span>
                     <svg class="w-5 h-5 rtl:rotate-0 ltr:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </a>
             </div>
         </main>
-        
-        <footer class="mt-20 text-center pb-8 z-10">
-            <p data-i18n="footer.text" class="text-slate-500 dark:text-slate-600 text-sm font-medium">&copy; 2026 Prism. صُنع للصحافة الحرة.</p>
+
+        <footer class="mt-10 sm:mt-20 text-center pb-6 sm:pb-8 z-10 px-4">
+            <p data-i18n="footer.text" class="text-slate-500 dark:text-slate-600 text-xs sm:text-sm font-medium">&copy; 2026 Prism. Built for free journalism.</p>
         </footer>
     </div>
     <script type="module">

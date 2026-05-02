@@ -1,12 +1,15 @@
 import { setLanguage, getLanguage, applyTranslations } from './i18n.js';
 
 export function initSettings() {
-    // Theme setup
-    const savedTheme = localStorage.getItem('prism_theme') || 'light';
+    // Theme setup — dark by default
+    const savedTheme = localStorage.getItem('prism_theme') || 'dark';
     if (savedTheme === 'dark') {
         document.documentElement.classList.add('dark');
     } else {
         document.documentElement.classList.remove('dark');
+    }
+    if (!localStorage.getItem('prism_theme')) {
+        localStorage.setItem('prism_theme', 'dark');
     }
 
     // Language setup

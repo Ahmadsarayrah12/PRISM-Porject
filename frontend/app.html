@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -91,12 +91,71 @@
             /* في وضع RTL يُخفى من اليمين */
             html[dir="rtl"] #sidebar { transform: translateX(100%); }
             #sidebar.sidebar-open   { transform: translateX(0) !important; }
+
+            /* تكبير عرض السايدبار قليلاً على الجوال لمظهر أنظف */
+            #sidebar { width: min(85vw, 320px) !important; }
+
+            /* تصغير الخطوط الكبيرة على الجوال */
+            #current-tool-title { font-size: 1.5rem !important; line-height: 1.25 !important; }
+            #news-input         { font-size: 1rem !important; min-height: 180px !important; padding: 1rem !important; }
+            .glass-editor       { border-radius: 1rem !important; }
+
+            /* النتائج تأخذ كامل العرض */
+            #results-content    { font-size: 1rem !important; }
+            #results-content h1 { font-size: 1.25rem !important; }
+            #results-content h2 { font-size: 1.1rem !important; }
+
+            /* Toast في وسط الأسفل */
+            #toast-container {
+                left: 50% !important;
+                right: auto !important;
+                transform: translateX(-50%);
+                bottom: 1rem !important;
+                width: calc(100vw - 2rem);
+                max-width: 360px;
+            }
+        }
+
+        /* ─── Floating Action Buttons ────────────────────── */
+        #scroll-top-btn {
+            position: fixed;
+            bottom: 1.5rem;
+            inset-inline-end: 1.5rem;
+            z-index: 30;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+            transition: opacity .25s ease, transform .25s ease;
+        }
+        #scroll-top-btn.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        /* ─── Reading time pill ──────────────────────────── */
+        .meta-pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 2px 8px; border-radius: 9999px;
+            font-size: 11px; font-weight: 600;
+            background: rgba(59, 130, 246, 0.08);
+            color: #2563eb;
+        }
+        .dark .meta-pill {
+            background: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
         }
     </style>
-    <!-- Pre-load theme -->
+    <!-- Pre-load theme & language (defaults: dark + en) -->
     <script>
-        if (localStorage.getItem('prism_theme') === 'dark') document.documentElement.classList.add('dark');
-        if (localStorage.getItem('prism_lang') === 'en') { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
+        (function () {
+            var theme = localStorage.getItem('prism_theme') || 'dark';
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+
+            var lang = localStorage.getItem('prism_lang') || 'en';
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        })();
     </script>
 </head>
 <body class="min-h-screen antialiased flex selection:bg-blue-500/30 selection:text-white relative">
@@ -196,11 +255,11 @@
             </button>
         </div>
 
-        <div class="w-full max-w-4xl mx-auto p-8 md:p-12 flex-1 flex flex-col">
-            
-            <header class="mb-10 rtl:text-right ltr:text-left">
-                <h2 id="current-tool-title" class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">...</h2>
-                <p data-i18n="app.header.desc" class="text-slate-500 dark:text-slate-400 text-base">مساحة عمل متقدمة معززة بالذكاء الاصطناعي لتحليل البيانات الصحفية.</p>
+        <div class="w-full max-w-4xl mx-auto p-4 sm:p-6 md:p-12 flex-1 flex flex-col">
+
+            <header class="mb-6 md:mb-10 rtl:text-right ltr:text-left">
+                <h2 id="current-tool-title" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mb-2">...</h2>
+                <p data-i18n="app.header.desc" class="text-slate-500 dark:text-slate-400 text-sm sm:text-base">An advanced AI-powered workspace for journalism data analysis.</p>
             </header>
 
             <!-- Editor Area -->
@@ -290,15 +349,26 @@
                 </div>
                 
                 <!-- Footer -->
-                <div class="px-6 py-4 flex justify-between items-center border-t border-slate-100 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/30 rounded-b-2xl">
-                    <div class="text-sm text-slate-500 font-semibold tracking-wide flex items-center gap-1">
-                        <span id="word-count" class="text-slate-700 dark:text-slate-300">0</span>
-                        <span data-i18n="editor.wordcount">كلمة</span>
+                <div class="px-4 sm:px-6 py-4 flex flex-wrap justify-between items-center gap-3 border-t border-slate-100 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/30 rounded-b-2xl">
+                    <div class="text-sm text-slate-500 font-semibold tracking-wide flex items-center gap-3 flex-wrap">
+                        <div class="flex items-center gap-1">
+                            <span id="word-count" class="text-slate-700 dark:text-slate-300">0</span>
+                            <span data-i18n="editor.wordcount">words</span>
+                        </div>
+                        <span id="reading-time" class="meta-pill hidden">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span id="reading-time-text">0 min</span>
+                        </span>
                     </div>
-                    <button id="process-btn" class="btn-gradient py-2.5 px-8 rounded-lg text-sm font-bold flex items-center gap-2">
-                        <svg class="w-4 h-4 shrink-0 rtl:rotate-0 ltr:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                        <span id="btn-text" data-i18n="editor.btn.process">بدء التحليل</span>
-                    </button>
+                    <div class="flex items-center gap-2 ms-auto">
+                        <button id="clear-btn" class="text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" data-i18n-title="editor.btn.clear" title="Clear">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/></svg>
+                        </button>
+                        <button id="process-btn" class="btn-gradient py-2.5 px-5 sm:px-8 rounded-lg text-sm font-bold flex items-center gap-2" title="Ctrl+Enter">
+                            <svg class="w-4 h-4 shrink-0 rtl:rotate-0 ltr:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            <span id="btn-text" data-i18n="editor.btn.process">Start Analysis</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -317,31 +387,39 @@
 
             <!-- Results -->
             <div id="results-container" class="hidden transform transition-all duration-500 scale-95 opacity-0 pb-16">
-                <div class="flex items-center justify-between mb-8 rtl:flex-row ltr:flex-row">
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <svg class="w-6 h-6 text-emerald-500 dark:text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <span data-i18n="results.title">نتائج التحليل</span>
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-6 sm:mb-8">
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500 dark:text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span data-i18n="results.title">Analysis Results</span>
                     </h3>
-                    <div class="flex gap-3">
-                        <button id="download-btn" class="bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
+                    <div class="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
+                        <button id="download-btn" class="flex-1 sm:flex-none justify-center bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            <span data-i18n="results.export">تصدير تقرير</span>
+                            <span data-i18n="results.export">Export Report</span>
                         </button>
-                        <button id="copy-btn" class="bg-blue-50 dark:bg-blue-600/20 hover:bg-blue-100 dark:hover:bg-blue-600/30 border border-blue-200 dark:border-blue-500/30 text-blue-700 dark:text-blue-400 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
+                        <button id="copy-btn" class="flex-1 sm:flex-none justify-center bg-blue-50 dark:bg-blue-600/20 hover:bg-blue-100 dark:hover:bg-blue-600/30 border border-blue-200 dark:border-blue-500/30 text-blue-700 dark:text-blue-400 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                            <span data-i18n="results.copy">نسخ النتيجة</span>
+                            <span data-i18n="results.copy">Copy Result</span>
+                        </button>
+                        <button id="fullscreen-btn" class="hidden sm:flex justify-center bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-lg text-sm font-medium transition-colors items-center gap-2 shadow-sm" data-i18n-title="results.fullscreen" title="Fullscreen">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
                         </button>
                     </div>
                 </div>
-                
+
                 <div id="results-visuals" class="mb-10 hidden"></div>
-                <div id="results-content" class="prose max-w-none text-lg"></div>
+                <div id="results-content" class="prose max-w-none text-base sm:text-lg"></div>
             </div>
         </div>
     </main>
 
+    <!-- Scroll to top FAB -->
+    <button id="scroll-top-btn" class="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 w-11 h-11 rounded-full flex items-center justify-center" aria-label="Scroll to top">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/></svg>
+    </button>
+
     <!-- Toast Container -->
-    <div id="toast-container" class="fixed bottom-8 left-8 z-50 flex flex-col gap-3 pointer-events-none"></div>
+    <div id="toast-container" class="fixed bottom-8 right-8 z-50 flex flex-col gap-3 pointer-events-none"></div>
 
     <script type="module">
         import { initSettings } from './js/settings.js';

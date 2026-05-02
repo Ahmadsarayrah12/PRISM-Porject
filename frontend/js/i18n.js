@@ -39,6 +39,8 @@ export const translations = {
         "editor.wordcount": "كلمة",
         "editor.btn.process": "بدء التحليل",
         "editor.btn.processing": "جاري التحليل...",
+        "editor.btn.clear": "مسح النص",
+        "results.fullscreen": "ملء الشاشة",
         "results.title": "نتائج التحليل",
         "results.export": "تصدير تقرير",
         "results.copy": "نسخ النتيجة",
@@ -123,6 +125,8 @@ export const translations = {
         "editor.wordcount": "words",
         "editor.btn.process": "Start Analysis",
         "editor.btn.processing": "Analyzing...",
+        "editor.btn.clear": "Clear text",
+        "results.fullscreen": "Fullscreen",
         "results.title": "Analysis Results",
         "results.export": "Export Report",
         "results.copy": "Copy Result",
@@ -177,7 +181,7 @@ export function setLanguage(lang) {
 }
 
 export function getLanguage() {
-    return localStorage.getItem('prism_lang') || 'ar';
+    return localStorage.getItem('prism_lang') || 'en';
 }
 
 export function applyTranslations(lang) {

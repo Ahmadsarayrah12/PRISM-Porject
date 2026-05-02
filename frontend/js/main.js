@@ -36,6 +36,59 @@ elements.toolBtns.forEach(btn => {
 
 elements.newsInput.addEventListener('input', () => {
     updateCounters(elements.newsInput.value);
+    updateReadingTime(elements.newsInput.value);
+});
+
+// ─── حساب وقت القراءة التقريبي (200 كلمة/دقيقة) ─────────
+const readingTimeEl   = document.getElementById('reading-time');
+const readingTimeText = document.getElementById('reading-time-text');
+const updateReadingTime = (text) => {
+    const words = (text || '').trim().split(/\s+/).filter(Boolean).length;
+    if (!words) { readingTimeEl?.classList.add('hidden'); return; }
+    const minutes = Math.max(1, Math.round(words / 200));
+    if (readingTimeText) readingTimeText.textContent = `~${minutes} min`;
+    readingTimeEl?.classList.remove('hidden');
+};
+
+// ─── زر مسح النص ─────────────────────────────────────────
+const clearBtn = document.getElementById('clear-btn');
+clearBtn?.addEventListener('click', () => {
+    if (!elements.newsInput.value.trim()) return;
+    if (!confirm('Clear all text?')) return;
+    elements.newsInput.value = '';
+    updateCounters('');
+    updateReadingTime('');
+    elements.newsInput.focus();
+});
+
+// ─── اختصار Ctrl/Cmd + Enter لبدء التحليل ───────────────
+elements.newsInput.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        elements.processBtn.click();
+    }
+});
+
+// ─── زر العودة للأعلى ────────────────────────────────────
+const scrollTopBtn = document.getElementById('scroll-top-btn');
+const mainScroller = document.querySelector('main');
+mainScroller?.addEventListener('scroll', () => {
+    if (mainScroller.scrollTop > 400) scrollTopBtn?.classList.add('visible');
+    else scrollTopBtn?.classList.remove('visible');
+});
+scrollTopBtn?.addEventListener('click', () => {
+    mainScroller?.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// ─── زر العرض الكامل للنتائج ─────────────────────────────
+const fullscreenBtn = document.getElementById('fullscreen-btn');
+fullscreenBtn?.addEventListener('click', () => {
+    const el = elements.resultsContainer;
+    if (!document.fullscreenElement) {
+        el?.requestFullscreen?.().catch(() => {});
+    } else {
+        document.exitFullscreen?.();
+    }
 });
 
 // متغير لحفظ الملف المرفوع
