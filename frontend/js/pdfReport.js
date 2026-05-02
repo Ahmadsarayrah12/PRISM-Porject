@@ -436,6 +436,166 @@ const buildPrintStyles = (meta) => {
   .prism-score-chip.warning { background: #fef9c3 !important; color: ${REPORT_CONFIG.warningColor} !important; }
   .prism-score-chip.danger  { background: #fee2e2 !important; color: ${REPORT_CONFIG.dangerColor}  !important; }
 
+  /* ── Word chips (Bias detected terms) ──────────── */
+  .prism-word-chip {
+    display: inline-block !important;
+    padding: 2pt 7pt !important;
+    margin: 1pt 2pt !important;
+    border-radius: 4pt !important;
+    background: #fee2e2 !important;
+    color: ${REPORT_CONFIG.dangerColor} !important;
+    border: 0.5pt solid #fecaca !important;
+    font-size: 8.5pt !important;
+    font-weight: 600 !important;
+    direction: ${dir};
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ── KPI block (bias score / credibility) ──────── */
+  .prism-kpi {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12pt;
+    background: #f8fafc !important;
+    border: 0.75pt solid #e2e8f0;
+    border-radius: 6pt;
+    padding: 12pt 14pt;
+    margin: 0 0 14pt;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    direction: ${dir};
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .prism-kpi__label {
+    font-family: ${fontDisplay};
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1pt;
+    color: #64748b !important;
+    margin-bottom: 2pt;
+  }
+  .prism-kpi__value {
+    font-family: ${fontDisplay};
+    font-size: 22pt;
+    font-weight: 900;
+    line-height: 1;
+    color: #0f172a !important;
+  }
+  .prism-kpi__bar {
+    flex: 1;
+    height: 10pt;
+    border-radius: 99pt;
+    background: linear-gradient(to right, #22c55e 0%, #eab308 50%, #ef4444 100%) !important;
+    position: relative;
+    overflow: visible;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .prism-kpi__marker {
+    position: absolute;
+    top: -3pt;
+    width: 3pt;
+    height: 16pt;
+    background: #0f172a !important;
+    border-radius: 1pt;
+    transform: translateX(-50%);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ── Status banner (Truth Guard) ────────────────── */
+  .prism-status-banner {
+    display: flex !important;
+    align-items: center;
+    gap: 10pt;
+    padding: 10pt 14pt;
+    border-radius: 6pt;
+    border: 1pt solid;
+    margin: 0 0 14pt;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    direction: ${dir};
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .prism-status-banner__icon {
+    width: 22pt; height: 22pt;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13pt;
+    font-weight: 900;
+    color: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .prism-status-banner__label {
+    font-family: ${fontDisplay};
+    font-size: 13pt;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+  .prism-status-banner__sub {
+    font-family: ${fontDisplay};
+    font-size: 8.5pt;
+    color: #64748b !important;
+    margin-top: 2pt;
+  }
+  .prism-status-banner.safe    { background: #f0fdf4 !important; border-color: #bbf7d0 !important; }
+  .prism-status-banner.safe    .prism-status-banner__icon  { background: ${REPORT_CONFIG.successColor} !important; }
+  .prism-status-banner.safe    .prism-status-banner__label { color: ${REPORT_CONFIG.successColor} !important; }
+  .prism-status-banner.warning { background: #fefce8 !important; border-color: #fde68a !important; }
+  .prism-status-banner.warning .prism-status-banner__icon  { background: ${REPORT_CONFIG.warningColor} !important; }
+  .prism-status-banner.warning .prism-status-banner__label { color: ${REPORT_CONFIG.warningColor} !important; }
+  .prism-status-banner.danger  { background: #fef2f2 !important; border-color: #fecaca !important; }
+  .prism-status-banner.danger  .prism-status-banner__icon  { background: ${REPORT_CONFIG.dangerColor} !important; }
+  .prism-status-banner.danger  .prism-status-banner__label { color: ${REPORT_CONFIG.dangerColor} !important; }
+
+  /* ── Two-column grid for fallacies/questions ────── */
+  .prism-grid-2 {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 10pt;
+    margin: 0 0 12pt;
+    direction: ${dir};
+  }
+  .prism-grid-2 > .prism-card {
+    margin-bottom: 0 !important;
+  }
+
+  /* ── Section title above visuals ────────────────── */
+  .prism-section-title {
+    font-family: ${fontDisplay} !important;
+    font-size: 9pt !important;
+    font-weight: 800 !important;
+    text-transform: uppercase;
+    letter-spacing: 1.5pt;
+    color: #475569 !important;
+    margin: 0 0 6pt !important;
+    padding: 0 !important;
+    border: none !important;
+    direction: ${dir};
+  }
+
+  /* ── Quoted analysis paragraph ──────────────────── */
+  .prism-analysis-quote {
+    border-${blockStart}: 2pt solid ${REPORT_CONFIG.accentColor};
+    padding: 4pt 0 4pt 10pt;
+    padding-${blockEnd}: 0;
+    padding-${blockStart}: 10pt;
+    margin: 8pt 0 0;
+    font-size: 10pt;
+    color: #334155 !important;
+    line-height: 1.6;
+    direction: ${dir};
+  }
+
   /* ── Progress / bias bars ───────────────────────── */
   .prism-bias-bar-wrap {
     background: #e2e8f0 !important;
@@ -557,6 +717,121 @@ const buildPrintFooter = (meta) => {
   return footer;
 };
 
+// ─── 6.b VISUAL TRANSFORMERS ─────────────────────────────
+// Convert dynamic UI visuals (Tailwind/conic-gradient) into
+// print-friendly equivalents that survive the print pipeline.
+
+const transformBiasGauge = (root, meta) => {
+  const gauge = root.querySelector('.gauge-wrapper');
+  if (!gauge) return;
+
+  const scoreText = gauge.querySelector('.gauge-cover span')?.textContent?.trim() || '';
+  const scoreNum  = parseFloat(scoreText) || 0;
+  const label     = meta.t === I18N.ar ? 'مؤشر الانحياز' : 'Bias Index';
+
+  const block = document.createElement('div');
+  block.className = 'prism-kpi';
+  block.innerHTML = `
+    <div style="min-width:90pt">
+      <div class="prism-kpi__label">${label}</div>
+      <div class="prism-kpi__value">${Math.round(scoreNum)}<span style="font-size:12pt;color:#64748b">%</span></div>
+    </div>
+    <div class="prism-kpi__bar">
+      <div class="prism-kpi__marker" style="${meta.isRtl ? 'right' : 'left'}: ${Math.min(100, Math.max(0, scoreNum))}%"></div>
+    </div>
+  `;
+  // Replace the original card containing the gauge entirely
+  const card = gauge.closest('.flex.items-start') || gauge.parentElement;
+  if (card) card.replaceWith(block);
+};
+
+const transformBiasWords = (root) => {
+  // Tailwind chips for biased words → print-friendly chips
+  root.querySelectorAll('span').forEach(s => {
+    const cls = s.className || '';
+    if (cls.includes('bg-red-100') || cls.includes('bg-red-500/10')) {
+      s.className = 'prism-word-chip';
+      s.removeAttribute('style');
+    }
+  });
+};
+
+const transformBiasAnalysisQuote = (root) => {
+  // The quoted analysis paragraph (border-l-2 pl-3)
+  root.querySelectorAll('p').forEach(p => {
+    const cls = p.className || '';
+    if (cls.includes('border-l-2') || cls.includes('border-r-2')) {
+      p.className = 'prism-analysis-quote';
+      p.removeAttribute('style');
+    }
+  });
+};
+
+const transformTruthBanner = (root, meta) => {
+  // Locate the truth status banner (has h4 with status text + credibility)
+  const banner = root.querySelector('[class*="rounded-xl"][class*="border"][class*="bg-"]');
+  if (!banner) return;
+
+  const label  = banner.querySelector('h4')?.textContent?.trim() || '';
+  const sub    = banner.querySelector('p')?.textContent?.trim() || '';
+  const cls    = banner.className;
+  let kind = 'warning';
+  if (/text-green/.test(cls)) kind = 'safe';
+  else if (/text-red/.test(cls)) kind = 'danger';
+  else if (/text-yellow/.test(cls)) kind = 'warning';
+
+  const icon = kind === 'safe' ? '✓' : (kind === 'danger' ? '!' : '?');
+
+  const replacement = document.createElement('div');
+  replacement.className = `prism-status-banner ${kind}`;
+  replacement.innerHTML = `
+    <div class="prism-status-banner__icon">${icon}</div>
+    <div>
+      <div class="prism-status-banner__label">${label}</div>
+      <div class="prism-status-banner__sub">${sub}</div>
+    </div>
+  `;
+  banner.replaceWith(replacement);
+};
+
+const transformInfoCards = (root) => {
+  // Truth fallacies/questions/recommendations cards
+  root.querySelectorAll('[class*="rounded-xl"][class*="bg-white"], [class*="rounded-xl"][class*="bg-slate"]').forEach(card => {
+    if (card.classList.contains('prism-status-banner')) return;
+    card.className = 'prism-card';
+    card.removeAttribute('style');
+    card.querySelectorAll('h3, h4').forEach(h => {
+      h.className = 'prism-section-title';
+      h.removeAttribute('style');
+    });
+    card.querySelectorAll('ul').forEach(ul => {
+      ul.className = '';
+      ul.removeAttribute('style');
+    });
+  });
+
+  // Two-column grids
+  root.querySelectorAll('[class*="md:grid-cols-2"], [class*="grid-cols-2"]').forEach(grid => {
+    grid.className = 'prism-grid-2';
+    grid.removeAttribute('style');
+  });
+};
+
+const transformVisualsForPrint = (root, meta) => {
+  try { transformBiasGauge(root, meta); }        catch (e) { console.warn('bias gauge transform:', e); }
+  try { transformBiasWords(root); }              catch (e) { console.warn('bias words transform:', e); }
+  try { transformBiasAnalysisQuote(root); }      catch (e) { console.warn('bias quote transform:', e); }
+  try { transformTruthBanner(root, meta); }      catch (e) { console.warn('truth banner transform:', e); }
+  try { transformInfoCards(root); }              catch (e) { console.warn('info cards transform:', e); }
+
+  // Strip lingering inline opacity/transform animations from cascade reveal
+  root.querySelectorAll('[style*="opacity"], [style*="transform"]').forEach(el => {
+    el.style.opacity = '';
+    el.style.transform = '';
+    el.style.transition = '';
+  });
+};
+
 /**
  * Wraps #results-container content in a proper A4 print wrapper,
  * replacing position:absolute with a true document-flow layout.
@@ -582,10 +857,18 @@ const buildPrintWrapper = (meta) => {
   const contentWrap = document.createElement('div');
   contentWrap.id = 'print-content';
   contentWrap.innerHTML = source.innerHTML;
-  // Remove action buttons that may have been cloned
+
+  // Remove action buttons / non-print decorations
   contentWrap.querySelectorAll(
-    '#download-btn, #copy-btn, #share-btn, .no-print, [data-no-print], .prism-print-header'
+    '#download-btn, #copy-btn, #share-btn, #fullscreen-btn, .no-print, [data-no-print], .prism-print-header'
   ).forEach(el => el.remove());
+
+  // Remove the screen-only results header (icon + title + actions row)
+  const screenHeader = contentWrap.querySelector('h3')?.parentElement;
+  if (screenHeader && screenHeader.querySelector('h3')) screenHeader.remove();
+
+  // Convert dynamic visuals to print-friendly versions
+  transformVisualsForPrint(contentWrap, meta);
 
   page.appendChild(contentWrap);
   page.appendChild(buildPrintFooter(meta));
