@@ -1,120 +1,126 @@
-const express = require('express');
-const router = express.Router();
-const { VertexAI } = require('@google-cloud/vertexai');
-require('dotenv').config();
+'use strict';
 
-// تهيئة اتصال Vertex AI
-// ملاحظة: في بيئة الإنتاج على Cloud Run ستكون هذه المتغيرات متاحة تلقائياً أو معدة مسبقاً
-const project = process.env.GOOGLE_CLOUD_PROJECT || 'your-project-id';
-const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
+const geminiService   = require('../services/geminiService');
+const prompts         = require('../utils/prompts');
+const catchAsync      = require('../utils/catchAsync');
+const { validatePublicUrl } = require('../utils/urlValidator');
+const axios   = require('axios');
+const cheerio = require('cheerio');
 
-const vertex_ai = new VertexAI({ project: project, location: location });
-const modelName = 'gemini-2.5-flash';
+// ==========================================
+// 🛠️ دالة إعادة المحاولة الذكية لتجاوز خطأ 429
+// ==========================================
+const executeWithRetry = async (fn, retries = 3, delayMs = 2000) => {
+    for (let i = 0; i < retries; i++) {
+        try {
+            return await fn();
+        } catch (error) {
+            // التحقق مما إذا كان الخطأ هو 429 أو استنفاد الموارد
+            const isRateLimit = 
+                error?.response?.status === 429 || 
+                error?.message?.includes('429') || 
+                error?.status === 'RESOURCE_EXHAUSTED' ||
+                error?.code === 429;
 
-// دالة مساعدة مركزية لاستدعاء نموذج Gemini
-async function callGemini(systemInstruction, userText) {
-    const generativeModel = vertex_ai.getGenerativeModel({
-        model: modelName,
-        generationConfig: {
-            temperature: 0.3,
-        },
-        systemInstruction: {
-            role: 'system',
-            parts: [{ text: systemInstruction }]
+            if (isRateLimit && i < retries - 1) {
+                console.warn(`⚠️ ضغط طلبات (429). جاري المحاولة ${i + 1} بعد ${delayMs / 1000} ثوانٍ...`);
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+                delayMs *= 2; // مضاعفة وقت الانتظار في المحاولة القادمة (2s -> 4s -> 8s)
+            } else {
+                throw error; // إذا كان خطأ آخر، أو انتهت المحاولات، ارمِ الخطأ
+            }
         }
+    }
+};
+
+const parseJsonFromGemini = (text) => {
+    try {
+        const start = text.indexOf('{');
+        const end = text.lastIndexOf('}');
+        if (start !== -1 && end !== -1) {
+            const jsonStr = text.substring(start, end + 1);
+            return JSON.parse(jsonStr);
+        }
+        return JSON.parse(text);
+    } catch(e) {
+        throw new Error('فشل في قراءة الرد المهيكل من الذكاء الاصطناعي.');
+    }
+};
+
+// 1. أداة التلخيص (ترجع Markdown)
+exports.summarize = catchAsync(async (req, res) => {
+    const prompt = prompts.summarize(req.body.options);
+    const result = await executeWithRetry(() => geminiService.callGemini(prompt, req.body.text));
+    res.status(200).json({ success: true, type: 'markdown', result });
+});
+
+// 2. أداة الموضوعية (ترجع JSON المهيكل للمؤشرات البصرية)
+exports.bias = catchAsync(async (req, res) => {
+    const prompt = prompts.bias(req.body.options);
+    const textResult = await executeWithRetry(() => geminiService.callGemini(prompt, req.body.text));
+    const result = parseJsonFromGemini(textResult);
+    res.status(200).json({ success: true, type: 'json_bias', result });
+});
+
+// 3. أداة إعادة التدوير (ترجع Markdown)
+exports.recycle = catchAsync(async (req, res) => {
+    const prompt = prompts.recycle(req.body.options);
+    const result = await executeWithRetry(() => geminiService.callGemini(prompt, req.body.text));
+    res.status(200).json({ success: true, type: 'markdown', result });
+});
+
+// 4. أداة درع الحقيقة (ترجع JSON المهيكل لتنبيهات الأمان)
+exports.truthGuard = catchAsync(async (req, res) => {
+    const prompt = prompts.truthGuard(req.body.options);
+    const textResult = await executeWithRetry(() => geminiService.callGemini(prompt, req.body.text));
+    const result = parseJsonFromGemini(textResult);
+    res.status(200).json({ success: true, type: 'json_truth', result });
+});
+
+// 5. أداة دمج الروايات المتعددة (Synthesis)
+exports.synthesis = catchAsync(async (req, res) => {
+    const prompt = prompts.synthesis(req.body.options);
+    const result = await executeWithRetry(() => geminiService.callGemini(prompt, req.body.text));
+    res.status(200).json({ success: true, type: 'markdown', result });
+});
+
+// 6. أداة سحب المقالات عبر الرابط (Scraper) - لم تتغير لأنها لا تكلم Gemini مباشرة
+exports.scrapeUrl = catchAsync(async (req, res) => {
+    const { url } = req.body;
+
+    if (!url || typeof url !== 'string') {
+        return res.status(400).json({ success: false, error: 'الرابط مطلوب.' });
+    }
+
+    const { valid, reason } = validatePublicUrl(url);
+    if (!valid) {
+        return res.status(400).json({ success: false, error: reason });
+    }
+
+    const response = await axios.get(url, {
+        timeout: 10_000, 
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; PrismBot/1.0)' },
     });
 
-    const request = {
-        contents: [
-            { role: 'user', parts: [{ text: userText }] }
-        ],
-    };
+    const $ = cheerio.load(response.data);
+    $('script, style, nav, header, footer, iframe, aside, .ads, .menu, noscript').remove();
 
-    const responseStream = await generativeModel.generateContent(request);
-    const result = await responseStream.response;
-    
-    // استخراج النص النهائي من الرد
-    return result.candidates[0].content.parts[0].text;
-}
+    let text = $('body').text().replace(/\s+/g, ' ').trim();
+    if (text.length > 25_000) text = text.substring(0, 25_000);
 
-// 1. أداة التلخيص (Summarize)
-router.post('/summarize', async (req, res) => {
-    try {
-        const { text } = req.body;
-        if (!text) return res.status(400).json({ error: 'النص الصحفي مطلوب' });
-
-        const systemPrompt = `أنت مساعد إعلامي محترف. مهمتك هي تلخيص الخبر الصحفي المقدم لك.
-يجب أن يكون الرد بتنسيق Markdown حصراً ويتضمن:
-1. 3 عناوين مقترحة للخبر (كقائمة).
-2. ملخص للخبر لا يتجاوز 3 أسطر.
-3. 3 أرقام أو إحصائيات هامة مذكورة في الخبر (إذا لم يوجد، اذكر أنه لا يوجد).`;
-
-        const result = await callGemini(systemPrompt, text);
-        res.json({ result });
-    } catch (error) {
-        console.error('Error in summarize API:', error);
-        res.status(500).json({ error: 'حدث خطأ أثناء معالجة الطلب في خوادم الذكاء الاصطناعي' });
-    }
+    res.status(200).json({ success: true, text });
 });
 
-// 2. أداة الموضوعية (Bias)
-router.post('/bias', async (req, res) => {
-    try {
-        const { text } = req.body;
-        if (!text) return res.status(400).json({ error: 'النص الصحفي مطلوب' });
+// 7. أداة تحليل الوسائط (الصوت والفيديو)
+exports.audioAnalysis = catchAsync(async (req, res) => {
+    const { file } = req;
+    const fileSizeMB = (file.size / 1024 / 1024).toFixed(1);
 
-        const systemPrompt = `أنت خبير في التحليل الإعلامي والموضوعية. مهمتك تحليل النص الصحفي المقدم لك.
-يجب أن يكون الرد بتنسيق Markdown حصراً ويتضمن:
-1. الكلمات أو العبارات المنحازة المذكورة في النص.
-2. "نسبة الإثارة" في النص (من 0% إلى 100%).
-3. إعادة صياغة الخبر بحيادية تامة وبدون أي تحيز.`;
+    console.log(`📎 Media analysis: ${file.originalname || 'unnamed'} | ${file.mimetype} | ${fileSizeMB} MB`);
 
-        const result = await callGemini(systemPrompt, text);
-        res.json({ result });
-    } catch (error) {
-        console.error('Error in bias API:', error);
-        res.status(500).json({ error: 'حدث خطأ أثناء معالجة الطلب في خوادم الذكاء الاصطناعي' });
-    }
+    const prompt = prompts.audioAnalysis();
+    const userMsg = 'الرجاء تفريغ هذا المقطع وتحليله بناءً على التعليمات.';
+
+    const result = await executeWithRetry(() => geminiService.callGeminiWithMedia(prompt, userMsg, file));
+    res.status(200).json({ success: true, type: 'markdown', result });
 });
-
-// 3. أداة إعادة التدوير (Recycle)
-router.post('/recycle', async (req, res) => {
-    try {
-        const { text } = req.body;
-        if (!text) return res.status(400).json({ error: 'النص الصحفي مطلوب' });
-
-        const systemPrompt = `أنت صانع محتوى محترف. مهمتك تحويل الخبر الصحفي المقدم لك إلى محتوى مناسب لمنصات التواصل الاجتماعي.
-يجب أن يكون الرد بتنسيق Markdown حصراً ويتضمن:
-1. تغريدة مناسبة لمنصة X (تويتر سابقاً) مع علامات التصنيف (Hashtags) المناسبة.
-2. منشور احترافي مناسب لمنصة LinkedIn.
-3. سكريبت فيديو قصير (Short/Reel) مدته لا تتجاوز 30 ثانية.`;
-
-        const result = await callGemini(systemPrompt, text);
-        res.json({ result });
-    } catch (error) {
-        console.error('Error in recycle API:', error);
-        res.status(500).json({ error: 'حدث خطأ أثناء معالجة الطلب في خوادم الذكاء الاصطناعي' });
-    }
-});
-
-// 4. أداة درع الحقيقة (Truth Guard)
-router.post('/truth-guard', async (req, res) => {
-    try {
-        const { text } = req.body;
-        if (!text) return res.status(400).json({ error: 'النص الصحفي مطلوب' });
-
-        const systemPrompt = `أنت مدقق حقائق صحفي صارم. مهمتك تحليل النص لاكتشاف التضليل والمغالطات.
-يجب أن يكون الرد بتنسيق Markdown حصراً ويتضمن:
-1. "مؤشر المصداقية": حدد بدقة واحدة من هذه الحالات (آمن، مشبوه، مضلل).
-2. استخراج أي مغالطات منطقية أو ادعاءات غير مدعومة بأدلة في النص.
-3. توصيات للصحفي للتحقق من صحة هذا الخبر.`;
-
-        const result = await callGemini(systemPrompt, text);
-        res.json({ result });
-    } catch (error) {
-        console.error('Error in truth-guard API:', error);
-        res.status(500).json({ error: 'حدث خطأ أثناء معالجة الطلب في خوادم الذكاء الاصطناعي' });
-    }
-});
-
-module.exports = router;

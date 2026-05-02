@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="page.app.title">Workspace | Prism</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; color: #0f172a; overflow-x: hidden; transition: background-color 0.3s, color 0.3s; }
+        .dark body { background-color: #020617; color: #f8fafc; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; }
+        
+        .prose { color: #334155; }
+        .dark .prose { color: #cbd5e1; }
+        .prose h1, .prose h2, .prose h3 { font-weight: 700; color: #0f172a; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+        .dark .prose h1, .dark .prose h2, .dark .prose h3 { color: #f8fafc; }
+        .prose ul, .prose ol { padding-right: 1.25rem; margin-bottom: 1rem; list-style-type: disc; }
+        html[dir="ltr"] .prose ul, html[dir="ltr"] .prose ol { padding-right: 0; padding-left: 1.25rem; }
+        .prose p { margin-bottom: 1rem; line-height: 1.8; }
+        .prose strong { color: #0f172a; font-weight: 600; }
+        .dark .prose strong { color: #f8fafc; }
+        
+        .glass-sidebar { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-left: 1px solid rgba(0,0,0,0.05); border-right: none; }
+        .dark .glass-sidebar { background: rgba(15, 23, 42, 0.6); border-left: 1px solid rgba(255,255,255,0.05); }
+        html[dir="ltr"] .glass-sidebar { border-left: none; border-right: 1px solid rgba(0,0,0,0.05); }
+        html[dir="ltr"] .dark .glass-sidebar { border-right: 1px solid rgba(255,255,255,0.05); }
+
+        .glass-editor { background: #ffffff; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05); transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+        .dark .glass-editor { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .glass-editor:focus-within { border-color: rgba(59,130,246,0.4); box-shadow: 0 0 0 4px rgba(59,130,246,0.1); }
+        
+        .glass-toolbar { background: #f8fafc; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .dark .glass-toolbar { background: rgba(15, 23, 42, 0.8); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        
+        .form-select { background-color: #ffffff; border: 1px solid #cbd5e1; color: #334155; appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: left 0.75rem center; background-repeat: no-repeat; background-size: 1.2em 1.2em; padding-left: 2.5rem !important; padding-right: 1rem !important; transition: all 0.2s; }
+        html[dir="ltr"] .form-select { background-position: right 0.75rem center; padding-left: 1rem !important; padding-right: 2.5rem !important; }
+        .dark .form-select { background-color: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23cbd5e1' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); }
+        .form-select:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+
+        .nav-item { color: #64748b; transition: all 0.2s; position: relative; overflow: hidden; border-right: 3px solid transparent; border-left: none; }
+        html[dir="ltr"] .nav-item { border-right: none; border-left: 3px solid transparent; }
+        .dark .nav-item { color: #94a3b8; }
+        .nav-item:hover { color: #0f172a; background: rgba(0,0,0,0.03); }
+        .dark .nav-item:hover { color: #f8fafc; background: rgba(255,255,255,0.05); }
+        
+        .nav-item.active { color: #2563eb; background: linear-gradient(270deg, rgba(59,130,246,0.08) 0%, transparent 100%); border-right: 3px solid #3b82f6; }
+        html[dir="ltr"] .nav-item.active { background: linear-gradient(90deg, rgba(59,130,246,0.08) 0%, transparent 100%); border-right: none; border-left: 3px solid #3b82f6; }
+        .dark .nav-item.active { color: #fff; background: linear-gradient(270deg, rgba(59,130,246,0.15) 0%, transparent 100%); }
+        html[dir="ltr"] .dark .nav-item.active { background: linear-gradient(90deg, rgba(59,130,246,0.15) 0%, transparent 100%); }
+        
+        @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
+        .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 1000px 100%; animation: shimmer 2s infinite linear; border-radius: 4px; }
+        .dark .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); }
+        
+        .toast-enter { animation: slideInUp 0.3s ease-out forwards; }
+        @keyframes slideInUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .gauge-wrapper { width: 100px; height: 50px; position: relative; overflow: hidden; border-radius: 50px 50px 0 0; background: #e2e8f0; }
+        .dark .gauge-wrapper { background: rgba(255,255,255,0.05); }
+        .gauge-fill { position: absolute; top: 0; left: 0; width: 100%; height: 200%; background: conic-gradient(#ef4444 0% 33%, #eab308 33% 66%, #22c55e 66% 100%); transform-origin: center; border-radius: 50%; transform: rotate(-90deg); transition: transform 1s ease-out; }
+        .gauge-cover { position: absolute; top: 8px; left: 8px; width: 84px; height: 84px; background: #ffffff; border-radius: 50%; }
+        .dark .gauge-cover { background: #0f172a; }
+        
+        .btn-gradient { background: linear-gradient(to right, #2563eb, #6366f1); color: white; transition: all 0.3s; }
+        .btn-gradient:hover { box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4); transform: translateY(-1px); }
+
+        /* ─── Mobile Sidebar ─────────────────────────────── */
+        @media (max-width: 767px) {
+            #sidebar {
+                position: fixed;
+                top: 0;
+                inset-inline-start: 0;
+                height: 100dvh;
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            /* في وضع RTL يُخفى من اليمين */
+            html[dir="rtl"] #sidebar { transform: translateX(100%); }
+            #sidebar.sidebar-open   { transform: translateX(0) !important; }
+        }
+    </style>
+    <!-- Pre-load theme -->
+    <script>
+        if (localStorage.getItem('prism_theme') === 'dark') document.documentElement.classList.add('dark');
+        if (localStorage.getItem('prism_lang') === 'en') { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
+    </script>
+</head>
+<body class="min-h-screen antialiased flex selection:bg-blue-500/30 selection:text-white relative">
+    
+    <!-- Ambient Lights -->
+    <div class="fixed top-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-600/5 dark:bg-blue-600/10 rounded-full blur-[150px] pointer-events-none z-0"></div>
+    <div class="fixed bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-purple-600/5 dark:bg-purple-600/10 rounded-full blur-[150px] pointer-events-none z-0"></div>
+
+    <!-- Overlay — يظهر خلف السايدبار على الجوال -->
+    <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-72 glass-sidebar flex flex-col shrink-0 h-screen sticky top-0 z-30 shadow-xl dark:shadow-2xl">
+        <div class="p-8 pb-6">
+            <a href="index.html" class="flex items-center gap-4 text-slate-900 dark:text-white mb-10 hover:opacity-80 transition-opacity rtl:text-right ltr:text-left">
+                <img src="assets/prism-icon.svg" class="w-12 h-12 drop-shadow-md dark:drop-shadow-[0_0_10px_rgba(59,130,246,0.4)]" alt="Prism Logo">
+                <div class="flex flex-col">
+                    <span class="font-black text-2xl tracking-[0.2em]" style="font-family: 'Montserrat', sans-serif;">PRISM</span>
+                    <span data-i18n="brand.subtitle" class="text-[9px] text-slate-500 dark:text-slate-400 font-semibold tracking-wider">مؤسسة إعلامية | MEDIA</span>
+                </div>
+            </a>
+            <div data-i18n="sidebar.tools" class="text-xs font-bold text-slate-400 dark:text-slate-500 mb-4 px-2 uppercase tracking-widest rtl:text-right ltr:text-left">أدوات التحليل</div>
+        </div>
+        
+        <nav class="flex flex-col gap-1 px-4 rtl:text-right ltr:text-left" id="tools-nav">
+            <button class="tool-btn nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium w-full" data-endpoint="summarize" data-title-key="tool.summarize.title" data-desc-key="editor.placeholder">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                <span data-i18n="tool.summarize.title">التلخيص الذكي</span>
+            </button>
+            <button class="tool-btn nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium w-full" data-endpoint="bias" data-title-key="tool.bias.title" data-desc-key="editor.placeholder">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
+                <span data-i18n="tool.bias.title">قياس الموضوعية</span>
+            </button>
+            <button class="tool-btn nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium w-full" data-endpoint="recycle" data-title-key="tool.recycle.title" data-desc-key="editor.placeholder">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <span data-i18n="tool.recycle.title">إعادة تدوير المحتوى</span>
+            </button>
+            <button class="tool-btn nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium w-full" data-endpoint="truth-guard" data-title-key="tool.truth.title" data-desc-key="editor.placeholder">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                <span data-i18n="tool.truth.title">درع الحقيقة</span>
+            </button>
+            <button class="tool-btn nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium w-full" data-endpoint="synthesis" data-title-key="tool.synthesis.title" data-desc-key="editor.placeholder">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                <span data-i18n="nav.synthesis">مُحقق الروايات</span>
+            </button>
+            <button class="tool-btn nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium w-full" data-endpoint="audio-analysis" data-title-key="tool.audio.title" data-desc-key="editor.placeholder">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                <span data-i18n="nav.audio">تفريغ الوسائط</span>
+            </button>
+        </nav>
+        
+        <div class="mt-auto p-6 border-t border-slate-200 dark:border-slate-800/50">
+            <div class="flex items-center gap-4 mb-4">
+                <button onclick="window.toggleTheme()" class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors" title="Toggle Theme">
+                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+                <button onclick="window.toggleLanguage()" class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors font-bold text-sm" title="Toggle Language">
+                    EN/AR
+                </button>
+            </div>
+            <div class="flex items-center gap-2 text-slate-400 dark:text-slate-500 text-xs font-semibold uppercase tracking-wider">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                AI Core Active
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto relative z-10">
+
+        <!-- شريط التنقل العلوي — يظهر على الجوال فقط -->
+        <div class="md:hidden sticky top-0 z-20 shrink-0 flex items-center justify-between px-4 py-3 glass-toolbar border-b border-slate-200 dark:border-slate-800">
+            <div class="flex items-center gap-3">
+                <img src="assets/prism-icon.svg" class="w-8 h-8" alt="Prism">
+                <span class="font-black text-lg tracking-[0.2em] text-slate-900 dark:text-white" style="font-family: 'Montserrat', sans-serif;">PRISM</span>
+            </div>
+            <button id="sidebar-open-btn"
+                    class="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    aria-label="Open sidebar">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div class="w-full max-w-4xl mx-auto p-8 md:p-12 flex-1 flex flex-col">
+            
+            <header class="mb-10 rtl:text-right ltr:text-left">
+                <h2 id="current-tool-title" class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">...</h2>
+                <p data-i18n="app.header.desc" class="text-slate-500 dark:text-slate-400 text-base">مساحة عمل متقدمة معززة بالذكاء الاصطناعي لتحليل البيانات الصحفية.</p>
+            </header>
+
+            <!-- Editor Area -->
+            <div class="glass-editor rounded-2xl flex flex-col mb-10">
+                <!-- Toolbar / Options -->
+                <div id="options-container" class="glass-toolbar p-4 rounded-t-2xl flex flex-wrap items-center gap-4">
+                    
+                    <!-- Summarize Options -->
+                    <div id="opts-summarize" class="tool-options hidden items-center gap-4 w-full">
+                        <select id="opt-sum-length" class="form-select text-sm py-2 px-4 rounded-lg font-medium">
+                            <option data-i18n="opt.sum.short" value="قصير جداً (نقاط سريعة)">ملخص قصير</option>
+                            <option data-i18n="opt.sum.med" value="متوسط" selected>ملخص قياسي</option>
+                            <option data-i18n="opt.sum.long" value="تفصيلي (تغطية كاملة)">ملخص تفصيلي</option>
+                        </select>
+                        <label class="flex items-center gap-2 cursor-pointer text-slate-600 dark:text-slate-300 text-sm hover:text-slate-900 dark:hover:text-white font-medium transition-colors rtl:flex-row ltr:flex-row-reverse">
+                            <input type="checkbox" id="opt-sum-quotes" class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-800 text-blue-600 focus:ring-blue-500 dark:focus:ring-offset-slate-900">
+                            <span data-i18n="opt.sum.quotes">استخراج الاقتباسات</span>
+                        </label>
+                    </div>
+
+                    <!-- Bias Options -->
+                    <div id="opts-bias" class="tool-options hidden items-center gap-4 w-full">
+                        <select id="opt-bias-strictness" class="form-select text-sm py-2 px-4 rounded-lg font-medium">
+                            <option data-i18n="opt.bias.lenient" value="متساهل (يقبل الرأي)">معيار متساهل</option>
+                            <option data-i18n="opt.bias.standard" value="قياسي" selected>معيار قياسي</option>
+                            <option data-i18n="opt.bias.strict" value="صارم جداً (معايير وكالات الأنباء الدولية)">معيار صارم</option>
+                        </select>
+                    </div>
+
+                    <!-- Recycle Options -->
+                    <div id="opts-recycle" class="tool-options hidden items-center gap-4 w-full">
+                        <div class="flex items-center gap-2 flex-wrap" id="platforms-container">
+                            <label class="cursor-pointer">
+                                <input type="checkbox" value="X (Twitter)" class="peer hidden opt-rec-platform-cb" checked>
+                                <div class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-500 dark:text-slate-400 peer-checked:bg-slate-900 peer-checked:border-slate-900 peer-checked:text-white dark:peer-checked:bg-white dark:peer-checked:text-slate-900 transition-all shadow-sm select-none">X (Twitter)</div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="checkbox" value="LinkedIn" class="peer hidden opt-rec-platform-cb" checked>
+                                <div class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-500 dark:text-slate-400 peer-checked:bg-slate-900 peer-checked:border-slate-900 peer-checked:text-white dark:peer-checked:bg-white dark:peer-checked:text-slate-900 transition-all shadow-sm select-none">LinkedIn</div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="checkbox" value="Instagram" class="peer hidden opt-rec-platform-cb">
+                                <div class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-500 dark:text-slate-400 peer-checked:bg-slate-900 peer-checked:border-slate-900 peer-checked:text-white dark:peer-checked:bg-white dark:peer-checked:text-slate-900 transition-all shadow-sm select-none">Instagram</div>
+                            </label>
+                        </div>
+                        <select id="opt-rec-tone" class="form-select text-sm py-2 px-4 rounded-lg font-medium">
+                            <option data-i18n="opt.rec.tone.formal" value="رسمية وإخبارية">رسمية</option>
+                            <option data-i18n="opt.rec.tone.engaging" value="تفاعلية مشوقة" selected>تفاعلية</option>
+                            <option data-i18n="opt.rec.tone.urgent" value="عاجلة وصادمة">عاجلة</option>
+                        </select>
+                        <select id="opt-rec-audience" class="form-select text-sm py-2 px-4 rounded-lg font-medium">
+                            <option data-i18n="opt.rec.aud.gen" value="الجمهور العام" selected>الجمهور العام</option>
+                            <option data-i18n="opt.rec.aud.youth" value="الشباب (Gen Z)">الشباب</option>
+                            <option data-i18n="opt.rec.aud.pro" value="المتخصصين والمحترفين">الشركات</option>
+                        </select>
+                    </div>
+
+                    <!-- Truth Guard Options -->
+                    <div id="opts-truth-guard" class="tool-options hidden items-center gap-4 w-full">
+                        <select id="opt-truth-type" class="form-select text-sm py-2 px-4 rounded-lg font-medium">
+                            <option data-i18n="opt.truth.full" value="تدقيق النص بالكامل" selected>النص بالكامل</option>
+                            <option data-i18n="opt.truth.numbers" value="تدقيق الأرقام والإحصائيات فقط">الأرقام والإحصائيات</option>
+                            <option data-i18n="opt.truth.quotes" value="تدقيق تصريح أو اقتباس محدد">تصريح محدد</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Input Area (Text, URL Scraper, File) -->
+                <div class="relative">
+                    <div id="url-scraper-bar" class="flex items-center gap-2 p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 rounded-t-xl">
+                        <input type="url" id="url-input" class="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:border-blue-500 transition-colors" placeholder="أو الصق رابط المقال هنا لجلب النص تلقائياً..." data-i18n-placeholder="placeholder.url">
+                        <button id="scrape-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                            <span data-i18n="btn.scrape">جلب النص</span>
+                        </button>
+                    </div>
+
+                    <textarea id="news-input" class="w-full bg-transparent p-6 text-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none resize-y min-h-[220px]" placeholder="أدخل النص هنا..."></textarea>
+                    
+                    <div id="file-dropzone" class="hidden w-[calc(100%-2rem)] min-h-[220px] border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex-col items-center justify-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-500 bg-slate-50 dark:bg-slate-800/50 transition-colors m-4">
+                        <svg class="w-12 h-12 text-slate-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
+                        <p class="text-slate-600 dark:text-slate-300 font-bold text-center" data-i18n="dropzone.title">اضغط هنا لاختيار ملف (صوتي أو فيديو)</p>
+                        <p class="text-sm text-slate-400 mt-1" data-i18n="dropzone.sub">الحد الأقصى: 20 ميغابايت</p>
+                        <input type="file" id="media-input" class="hidden" accept="audio/*,video/*">
+                        <div id="file-name-display" class="mt-4 text-blue-600 dark:text-blue-400 font-bold hidden"></div>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="px-6 py-4 flex justify-between items-center border-t border-slate-100 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/30 rounded-b-2xl">
+                    <div class="text-sm text-slate-500 font-semibold tracking-wide flex items-center gap-1">
+                        <span id="word-count" class="text-slate-700 dark:text-slate-300">0</span>
+                        <span data-i18n="editor.wordcount">كلمة</span>
+                    </div>
+                    <button id="process-btn" class="btn-gradient py-2.5 px-8 rounded-lg text-sm font-bold flex items-center gap-2">
+                        <svg class="w-4 h-4 shrink-0 rtl:rotate-0 ltr:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <span id="btn-text" data-i18n="editor.btn.process">بدء التحليل</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Skeleton Loader -->
+            <div id="skeleton-container" class="hidden glass-editor rounded-2xl p-8 mb-10">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="w-8 h-8 rounded-full skeleton"></div>
+                    <div class="h-5 w-40 skeleton"></div>
+                </div>
+                <div class="space-y-4">
+                    <div class="h-4 w-full skeleton"></div>
+                    <div class="h-4 w-11/12 skeleton"></div>
+                    <div class="h-4 w-4/5 skeleton"></div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div id="results-container" class="hidden transform transition-all duration-500 scale-95 opacity-0 pb-16">
+                <div class="flex items-center justify-between mb-8 rtl:flex-row ltr:flex-row">
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <svg class="w-6 h-6 text-emerald-500 dark:text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span data-i18n="results.title">نتائج التحليل</span>
+                    </h3>
+                    <div class="flex gap-3">
+                        <button id="download-btn" class="bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <span data-i18n="results.export">تصدير تقرير</span>
+                        </button>
+                        <button id="copy-btn" class="bg-blue-50 dark:bg-blue-600/20 hover:bg-blue-100 dark:hover:bg-blue-600/30 border border-blue-200 dark:border-blue-500/30 text-blue-700 dark:text-blue-400 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            <span data-i18n="results.copy">نسخ النتيجة</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="results-visuals" class="mb-10 hidden"></div>
+                <div id="results-content" class="prose max-w-none text-lg"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-8 left-8 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <script type="module">
+        import { initSettings } from './js/settings.js';
+        initSettings();
+    </script>
+    <script type="module" src="js/sidebar.js"></script>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

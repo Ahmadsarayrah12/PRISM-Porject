@@ -1,5 +1,5 @@
 {
-  "name": "smart-media-assistant",
+  "name": "prism-media",
   "version": "1.0.0",
   "description": "المساعد الإعلامي الذكي للصحفيين",
   "main": "server.js",
@@ -8,9 +8,17 @@
     "dev": "node server.js"
   },
   "dependencies": {
+    "@google-cloud/storage": "^7.19.0",
     "@google-cloud/vertexai": "^1.1.0",
+    "@google/genai": "^1.50.1",
+    "axios": "^1.15.2",
+    "cheerio": "^1.2.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "express-rate-limit": "^8.4.1",
+    "helmet": "^8.1.0",
+    "multer": "^2.1.1",
+    "uuid": "^14.0.0"
   }
 }

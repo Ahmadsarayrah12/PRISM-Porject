@@ -3,75 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المساعد الإعلامي الذكي</title>
-    <!-- Tailwind CSS عبر CDN -->
+    <title data-i18n="page.home.title">Prism | منصة الإعلام الذكي</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- مكتبة Marked.js لتحويل Markdown إلى HTML -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        /* تنسيقات مخصصة لتجميل محتوى Markdown المُولد */
-        .prose h1, .prose h2, .prose h3 { font-weight: bold; margin-top: 1rem; margin-bottom: 0.5rem; color: #1e3a8a; }
-        .prose ul, .prose ol { list-style-type: disc; padding-right: 1.5rem; margin-bottom: 1rem; }
-        .prose p { margin-bottom: 0.75rem; }
-        .prose strong { color: #1d4ed8; }
-        .prose blockquote { border-right: 4px solid #3b82f6; padding-right: 1rem; color: #4b5563; background-color: #eff6ff; padding: 0.5rem; margin-bottom: 1rem; }
+        body { font-family: 'Cairo', sans-serif; transition: background-color 0.3s; }
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .glass-panel:hover { background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(59,130,246,0.3); transform: translateY(-3px); box-shadow: 0 20px 40px -15px rgba(59,130,246,0.15); }
+        
+        .dark body { background-color: #020617; }
+        .dark .glass-panel { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.05); }
+        .dark .glass-panel:hover { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(59,130,246,0.3); }
     </style>
+    <!-- Pre-load theme to prevent flash -->
+    <script>
+        if (localStorage.getItem('prism_theme') === 'dark') document.documentElement.classList.add('dark');
+        if (localStorage.getItem('prism_lang') === 'en') { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
+    </script>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col md:flex-row">
+<body class="text-slate-900 dark:text-slate-200 bg-slate-50 dark:bg-slate-950 min-h-screen flex flex-col relative overflow-x-hidden selection:bg-blue-500/30">
+    
+    <div class="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-400/20 dark:bg-blue-600/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-400/20 dark:bg-purple-600/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
-    <!-- القائمة الجانبية (Sidebar) -->
-    <aside class="w-full md:w-64 bg-slate-900 text-white flex flex-col p-4 shadow-xl shrink-0">
-        <h1 class="text-2xl font-extrabold mb-8 text-center mt-4 tracking-wide text-blue-400">المساعد الإعلامي</h1>
-        <nav class="flex flex-col gap-3">
-            <button class="tool-btn bg-blue-600 hover:bg-blue-500 px-4 py-3 rounded-lg text-right font-semibold transition-all duration-200 border-r-4 border-blue-300 shadow" data-endpoint="summarize" data-title="التلخيص">📝 التلخيص</button>
-            <button class="tool-btn hover:bg-slate-800 px-4 py-3 rounded-lg text-right font-semibold transition-all duration-200 border-r-4 border-transparent hover:border-slate-400" data-endpoint="bias" data-title="الموضوعية">⚖️ الموضوعية</button>
-            <button class="tool-btn hover:bg-slate-800 px-4 py-3 rounded-lg text-right font-semibold transition-all duration-200 border-r-4 border-transparent hover:border-slate-400" data-endpoint="recycle" data-title="إعادة التدوير">♻️ إعادة التدوير</button>
-            <button class="tool-btn hover:bg-slate-800 px-4 py-3 rounded-lg text-right font-semibold transition-all duration-200 border-r-4 border-transparent hover:border-slate-400" data-endpoint="truth-guard" data-title="درع الحقيقة">🛡️ درع الحقيقة</button>
-        </nav>
-    </aside>
-
-    <!-- مساحة العمل الرئيسية -->
-    <main class="flex-1 p-6 flex flex-col w-full max-w-5xl mx-auto">
-        <header class="mb-6">
-            <h2 id="current-tool-title" class="text-3xl font-bold text-slate-800">أداة التلخيص</h2>
-            <p class="text-slate-500 mt-2 text-lg">أدخل الخبر الصحفي أدناه للحصول على التحليل المدعوم بالذكاء الاصطناعي.</p>
+    <div class="relative z-10 flex flex-col min-h-screen">
+        <header class="flex justify-between items-center p-6 md:px-16 md:py-8 max-w-7xl mx-auto w-full">
+            <div class="flex items-center gap-4">
+                <img src="assets/prism-icon.svg" class="w-12 h-12 md:w-16 md:h-16 drop-shadow-md" alt="Prism Logo">
+                <div class="flex flex-col">
+                    <h1 class="text-3xl md:text-4xl font-black tracking-[0.25em] text-slate-900 dark:text-white" style="font-family: 'Montserrat', sans-serif;">PRISM</h1>
+                    <span data-i18n="brand.subtitle" class="text-[10px] md:text-xs text-slate-500 dark:text-slate-400 font-semibold tracking-wider">مؤسسة إعلامية | MEDIA</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <button onclick="window.toggleLanguage()" class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors font-bold text-sm">
+                    EN/AR
+                </button>
+                <button onclick="window.toggleTheme()" class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
+                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+                <a href="app.html" data-i18n="nav.workspace" class="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-200 shadow-sm text-sm font-semibold transition-all hover:shadow-md">مساحة العمل &larr;</a>
+            </div>
         </header>
 
-        <!-- منطقة إدخال النص الصحفي -->
-        <div class="bg-white p-5 rounded-xl shadow-md border border-slate-200 mb-6 flex-1 flex flex-col min-h-[350px]">
-            <textarea id="news-input" class="w-full flex-1 p-4 text-lg border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-slate-50" placeholder="اكتب أو انسخ النص الصحفي هنا..."></textarea>
+        <main class="flex-1 flex flex-col items-center justify-center px-6 text-center max-w-5xl mx-auto w-full">
+            <div data-i18n="home.tag" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-blue-200 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/10 text-xs font-bold text-blue-600 dark:text-blue-300 mb-8 uppercase tracking-widest shadow-sm">
+                الجيل القادم من الإعلام
+            </div>
             
-            <div class="mt-5 flex justify-end">
-                <button id="process-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg inline-flex items-center transition-colors shadow-lg">
-                    <span id="btn-text">معالجة النص</span>
-                    <!-- مؤشر التحميل (Spinner) مخفي افتراضياً -->
-                    <svg id="loading-spinner" class="animate-spin mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
+            <h2 data-i18n="home.hero.title" class="text-5xl md:text-7xl font-extrabold text-slate-900 dark:text-white mb-6 leading-tight">
+                الصحافة التحليلية، <br> <span class="bg-gradient-to-l from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">مُعاد ابتكارها بالذكاء الاصطناعي.</span>
+            </h2>
+            <p data-i18n="home.hero.desc" class="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-16 max-w-3xl mx-auto leading-relaxed">
+                منصة متطورة مصممة للغرف الإخبارية الحديثة. دقة متناهية في التلخيص، كشف الانحياز، وتدقيق الحقائق في أجزاء من الثانية.
+            </p>
 
-        <!-- منطقة عرض النتائج (مخفية افتراضياً) -->
-        <div id="results-container" class="hidden bg-white p-6 rounded-xl shadow-md border border-slate-200 relative mb-8">
-            <div class="flex justify-between items-center mb-5 border-b border-slate-100 pb-3">
-                <h3 class="text-2xl font-bold text-slate-800">النتيجة:</h3>
-                <button id="copy-btn" class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-3 py-1.5 rounded font-medium text-sm flex items-center gap-2 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                    نسخ النتيجة
-                </button>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full text-right rtl:text-right ltr:text-left">
+                <a href="app.html?tool=summarize" class="glass-panel p-6 rounded-2xl flex flex-col transition-all duration-300 cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center mb-5 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20 shadow-sm"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg></div>
+                    <h3 data-i18n="tool.summarize.title" class="text-lg font-bold text-slate-900 dark:text-white mb-2">التلخيص الذكي</h3>
+                    <p data-i18n="tool.summarize.desc" class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">استخراج مقتطفات دقيقة وعناوين رئيسية من التقارير المطولة.</p>
+                </a>
+                
+                <a href="app.html?tool=bias" class="glass-panel p-6 rounded-2xl flex flex-col transition-all duration-300 cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-500/10 flex items-center justify-center mb-5 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-500/20 shadow-sm"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg></div>
+                    <h3 data-i18n="tool.bias.title" class="text-lg font-bold text-slate-900 dark:text-white mb-2">قياس الموضوعية</h3>
+                    <p data-i18n="tool.bias.desc" class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">تحليل الانحياز اللفظي وتحديد نبرة الإثارة في الأخبار.</p>
+                </a>
+                
+                <a href="app.html?tool=recycle" class="glass-panel p-6 rounded-2xl flex flex-col transition-all duration-300 cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mb-5 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-500/20 shadow-sm"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg></div>
+                    <h3 data-i18n="tool.recycle.title" class="text-lg font-bold text-slate-900 dark:text-white mb-2">إعادة التدوير</h3>
+                    <p data-i18n="tool.recycle.desc" class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">تحويل الأخبار لصيغ ملائمة لمنصات التواصل الاجتماعي.</p>
+                </a>
+                
+                <a href="app.html?tool=truth-guard" class="glass-panel p-6 rounded-2xl flex flex-col transition-all duration-300 cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center mb-5 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-500/20 shadow-sm"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
+                    <h3 data-i18n="tool.truth.title" class="text-lg font-bold text-slate-900 dark:text-white mb-2">درع الحقيقة</h3>
+                    <p data-i18n="tool.truth.desc" class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">نظام تدقيق الحقائق واكتشاف المغالطات المنطقية.</p>
+                </a>
             </div>
-            <div id="results-content" class="prose max-w-none text-slate-700 leading-loose text-lg">
-                <!-- سيتم عرض محتوى Markdown المنسق هنا بواسطة JavaScript -->
+            
+            <div class="mt-16">
+                <a href="app.html" class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold px-10 py-4 rounded-full inline-flex items-center gap-3 transition-transform hover:scale-105 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] dark:shadow-[0_0_40px_rgba(255,255,255,0.2)]">
+                    <span data-i18n="home.cta">بدء الاستخدام مجاناً</span>
+                    <svg class="w-5 h-5 rtl:rotate-0 ltr:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                </a>
             </div>
-        </div>
-    </main>
-
-    <!-- ربط ملف JavaScript -->
-    <script src="script.js"></script>
+        </main>
+        
+        <footer class="mt-20 text-center pb-8 z-10">
+            <p data-i18n="footer.text" class="text-slate-500 dark:text-slate-600 text-sm font-medium">&copy; 2026 Prism. صُنع للصحافة الحرة.</p>
+        </footer>
+    </div>
+    <script type="module">
+        import { initSettings } from './js/settings.js';
+        initSettings();
+    </script>
 </body>
 </html>
