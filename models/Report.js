@@ -21,6 +21,11 @@ const ReportSchema = new mongoose.Schema({
     options: {
         type: Object,
         default: {}
+    },
+    favorite: {
+        type: Boolean,
+        default: false,
+        index: true
     }
 }, {
     timestamps: true // يقوم بإنشاء createdAt و updatedAt تلقائياً

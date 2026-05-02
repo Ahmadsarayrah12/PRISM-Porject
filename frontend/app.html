@@ -145,6 +145,40 @@
             background: rgba(59, 130, 246, 0.15);
             color: #93c5fd;
         }
+
+        /* ─── History filter chips ───────────────────────── */
+        .history-filter-chip {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            background: transparent;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            transition: all 0.15s;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .history-filter-chip:hover { color: #2563eb; border-color: #93c5fd; }
+        .history-filter-chip.active { background: #2563eb; border-color: #2563eb; color: #fff; }
+        .dark .history-filter-chip { color: #94a3b8; border-color: #334155; }
+        .dark .history-filter-chip:hover { color: #93c5fd; border-color: #1e40af; }
+        .dark .history-filter-chip.active { background: #3b82f6; border-color: #3b82f6; color: #fff; }
+
+        /* ─── Auto-save indicator ────────────────────────── */
+        #autosave-indicator {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 11px; font-weight: 600;
+            color: #16a34a; opacity: 0;
+            transition: opacity 0.3s;
+        }
+        #autosave-indicator.visible { opacity: 1; }
+        .dark #autosave-indicator { color: #4ade80; }
+
+        /* ─── Favorite star ──────────────────────────────── */
+        .fav-star { transition: all 0.15s; cursor: pointer; }
+        .fav-star.is-fav { color: #eab308; fill: #eab308; }
+        .fav-star:hover { transform: scale(1.15); }
     </style>
     <!-- Pre-load theme & language (defaults: dark + en) -->
     <script>
@@ -208,15 +242,31 @@
         </nav>
         <!-- History Section (سجل التقارير) -->
         <div class="flex flex-col flex-1 mt-4 overflow-hidden border-t border-slate-200 dark:border-slate-800/50">
-            <div class="px-6 py-4 flex items-center justify-between shrink-0">
-                <span data-i18n="history.title" class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest rtl:text-right ltr:text-left">سجل التقارير</span>
-                <button id="refresh-history-btn" class="text-slate-400 hover:text-blue-500 transition-colors bg-slate-100 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full p-1.5" data-i18n-title="history.refresh" title="تحديث السجل">
+            <div class="px-6 py-3 flex items-center justify-between shrink-0">
+                <span data-i18n="history.title" class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest rtl:text-right ltr:text-left">Report History</span>
+                <button id="refresh-history-btn" class="text-slate-400 hover:text-blue-500 transition-colors bg-slate-100 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full p-1.5" data-i18n-title="history.refresh" title="Refresh">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                 </button>
             </div>
+
+            <!-- Search & Filter -->
+            <div class="px-4 pb-2 shrink-0 flex flex-col gap-2">
+                <div class="relative">
+                    <svg class="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 ltr:left-2.5 rtl:right-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input id="history-search" type="text" data-i18n-placeholder="history.search.placeholder" placeholder="Search reports..." class="w-full bg-slate-100 dark:bg-slate-800 text-xs rounded-lg ltr:pl-8 rtl:pr-8 ltr:pr-3 rtl:pl-3 py-2 text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition" />
+                </div>
+                <div id="history-filters" class="flex flex-wrap gap-1">
+                    <button class="history-filter-chip active" data-filter="all" data-i18n="history.filter.all">All</button>
+                    <button class="history-filter-chip" data-filter="favorite" title="Favorites">⭐</button>
+                    <button class="history-filter-chip" data-filter="summarize" data-i18n="history.filter.summarize">Summary</button>
+                    <button class="history-filter-chip" data-filter="bias" data-i18n="history.filter.bias">Bias</button>
+                    <button class="history-filter-chip" data-filter="recycle" data-i18n="history.filter.recycle">Recycle</button>
+                    <button class="history-filter-chip" data-filter="truthGuard" data-i18n="history.filter.truth">Truth</button>
+                </div>
+            </div>
+
             <div id="history-list" class="flex-1 overflow-y-auto px-4 pb-4 flex flex-col gap-2 scroll-smooth">
-                <!-- سيتم إدراج التقارير هنا -->
-                <div class="text-center text-xs text-slate-400 py-4">جاري التحميل...</div>
+                <div class="text-center text-xs text-slate-400 py-4">Loading...</div>
             </div>
         </div>
         
@@ -358,6 +408,10 @@
                         <span id="reading-time" class="meta-pill hidden">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             <span id="reading-time-text">0 min</span>
+                        </span>
+                        <span id="autosave-indicator">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span data-i18n="editor.saved">Saved</span>
                         </span>
                     </div>
                     <div class="flex items-center gap-2 ms-auto">

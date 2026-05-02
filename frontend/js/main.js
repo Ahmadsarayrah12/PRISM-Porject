@@ -37,7 +37,52 @@ elements.toolBtns.forEach(btn => {
 elements.newsInput.addEventListener('input', () => {
     updateCounters(elements.newsInput.value);
     updateReadingTime(elements.newsInput.value);
+    scheduleAutoSave();
 });
+
+// ─── Auto-save المسودات في localStorage ─────────────────
+const AUTOSAVE_KEY = 'prism_draft';
+const autosaveEl   = document.getElementById('autosave-indicator');
+let autosaveTimer;
+
+const showSaved = () => {
+    autosaveEl?.classList.add('visible');
+    clearTimeout(showSaved._t);
+    showSaved._t = setTimeout(() => autosaveEl?.classList.remove('visible'), 1500);
+};
+
+const scheduleAutoSave = () => {
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(() => {
+        const value = elements.newsInput.value;
+        if (value.trim().length > 10) {
+            localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({
+                text: value,
+                tool: getCurrentEndpoint(),
+                ts:   Date.now()
+            }));
+            showSaved();
+        } else {
+            localStorage.removeItem(AUTOSAVE_KEY);
+        }
+    }, 800);
+};
+
+// استرجاع المسودة عند فتح الصفحة (إذا أحدث من 24 ساعة)
+const restoreDraft = () => {
+    try {
+        const raw = localStorage.getItem(AUTOSAVE_KEY);
+        if (!raw) return;
+        const draft = JSON.parse(raw);
+        const ageHours = (Date.now() - draft.ts) / 36e5;
+        if (ageHours > 24 || !draft.text) return;
+        if (elements.newsInput.value.trim()) return;
+        elements.newsInput.value = draft.text;
+        updateCounters(draft.text);
+        updateReadingTime(draft.text);
+    } catch { /* ignore */ }
+};
+restoreDraft();
 
 // ─── حساب وقت القراءة التقريبي (200 كلمة/دقيقة) ─────────
 const readingTimeEl   = document.getElementById('reading-time');
@@ -58,6 +103,7 @@ clearBtn?.addEventListener('click', () => {
     elements.newsInput.value = '';
     updateCounters('');
     updateReadingTime('');
+    localStorage.removeItem(AUTOSAVE_KEY);
     elements.newsInput.focus();
 });
 
@@ -208,6 +254,9 @@ elements.processBtn.addEventListener('click', async () => {
         }
         
         showToast('toast.success', 'success');
+        localStorage.removeItem(AUTOSAVE_KEY);
+        // إعادة جلب السجل ليظهر التقرير الجديد فوراً
+        if (typeof window.__refreshHistory === 'function') window.__refreshHistory();
         elements.resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     } catch (error) {

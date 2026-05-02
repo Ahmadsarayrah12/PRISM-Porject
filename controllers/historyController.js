@@ -25,3 +25,17 @@ exports.deleteHistory = catchAsync(async (req, res) => {
     }
     res.status(200).json({ success: true, message: 'تم حذف التقرير بنجاح.' });
 });
+
+// تبديل حالة المفضلة لتقرير محدد
+exports.toggleFavorite = catchAsync(async (req, res) => {
+    if (mongoose.connection.readyState !== 1) {
+        return res.status(503).json({ success: false, error: 'قاعدة البيانات غير متصلة.' });
+    }
+    const report = await Report.findById(req.params.id);
+    if (!report) {
+        return res.status(404).json({ success: false, error: 'التقرير غير موجود.' });
+    }
+    report.favorite = !report.favorite;
+    await report.save();
+    res.status(200).json({ success: true, data: { _id: report._id, favorite: report.favorite } });
+});
