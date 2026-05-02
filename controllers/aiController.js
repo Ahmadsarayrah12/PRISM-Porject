@@ -6,7 +6,9 @@ const catchAsync      = require('../utils/catchAsync');
 const { validatePublicUrl } = require('../utils/urlValidator');
 const axios   = require('axios');
 const cheerio = require('cheerio');
-const Report  = require('../models/Report'); // استيراد قاعدة البيانات
+const Report  = require('../models/Report');
+const config  = require('../config/env');
+const mongoose = require('mongoose');
 
 // ==========================================
 // 🛠️ دالة إعادة المحاولة الذكية لتجاوز خطأ 429
@@ -51,7 +53,7 @@ const parseJsonFromGemini = (text) => {
 // دالة مساعدة لحفظ التقرير في قاعدة البيانات (بدون إيقاف السيرفر في حال فشل الحفظ)
 const saveReportToDB = async (endpoint, inputText, aiResult, options) => {
     try {
-        if (!process.env.MONGO_URI) return null;
+        if (!config.MONGO_URI || mongoose.connection.readyState !== 1) return null;
         const report = await Report.create({
             endpoint,
             inputText: inputText || '',

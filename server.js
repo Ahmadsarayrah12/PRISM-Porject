@@ -29,7 +29,7 @@ app.use(helmet({ contentSecurityPolicy: false }));
 // ──────────────────────────────────────────────
 app.use(cors({
     origin:         config.ALLOWED_ORIGIN,
-    methods:        ['GET', 'POST'],
+    methods:        ['GET', 'POST', 'DELETE'],
     allowedHeaders: ['Content-Type'],
 }));
 
