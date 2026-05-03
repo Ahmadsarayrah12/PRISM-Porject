@@ -150,4 +150,78 @@ const callGeminiWithMedia = async (systemInstruction, userText, file) => {
     return response.text;
 };
 
-module.exports = { callGemini, callGeminiWithMedia };
+/**
+ * نسخة streaming من callGemini — تعيد async iterator يعطي أجزاء النص تدريجياً.
+ * @param {string} systemInstruction
+ * @param {string} userText
+ * @returns {AsyncIterable<string>}
+ */
+const callGeminiStream = async function* (systemInstruction, userText) {
+    const responseStream = await ai.models.generateContentStream({
+        model:    config.GEMINI_MODEL,
+        contents: [{ role: 'user', parts: [{ text: userText }] }],
+        config: {
+            systemInstruction,
+            temperature: 0.3,
+        },
+    });
+
+    for await (const chunk of responseStream) {
+        if (chunk?.text) yield chunk.text;
+    }
+};
+
+/**
+ * نسخة streaming من callGeminiWithMedia — تعطي أجزاء النص تدريجياً للوسائط.
+ * @param {string} systemInstruction
+ * @param {string} userText
+ * @param {Express.Multer.File} file
+ * @returns {AsyncIterable<string>}
+ */
+const callGeminiWithMediaStream = async function* (systemInstruction, userText, file) {
+    let mediaPart;
+
+    if (file.buffer.length <= INLINE_LIMIT_BYTES) {
+        mediaPart = {
+            inlineData: {
+                mimeType: file.mimetype,
+                data:     file.buffer.toString('base64'),
+            },
+        };
+    } else if (storage && config.GCS_BUCKET) {
+        const gcsUri = await uploadToGCS(file);
+        mediaPart = {
+            fileData: {
+                mimeType: file.mimetype,
+                fileUri:  gcsUri,
+            },
+        };
+    } else {
+        const sizeMB = (file.buffer.length / 1024 / 1024).toFixed(1);
+        throw Object.assign(
+            new Error(
+                `حجم الملف (${sizeMB} MB) يتجاوز حد الإرسال المباشر (10 MB). ` +
+                `أضف GCS_BUCKET إلى ملف .env لدعم الملفات الكبيرة.`
+            ),
+            { statusCode: 413 }
+        );
+    }
+
+    const responseStream = await ai.models.generateContentStream({
+        model:    config.GEMINI_MODEL,
+        contents: [{
+            role:  'user',
+            parts: [{ text: userText }, mediaPart],
+        }],
+        config: {
+            systemInstruction,
+            temperature: 0.3,
+        },
+    });
+
+    for await (const chunk of responseStream) {
+        if (chunk?.text) yield chunk.text;
+    }
+};
+
+module.exports = { callGemini, callGeminiWithMedia, callGeminiStream, callGeminiWithMediaStream };

@@ -1,6 +1,6 @@
-import { elements, showToast, hideResults, renderCascadingHTML, renderJSONVisuals, updateCounters, updateFileCounter } from './ui.js';
+import { elements, showToast, hideResults, renderCascadingHTML, renderJSONVisuals, showResultsContainer, updateCounters, updateFileCounter } from './ui.js';
 import { selectTool, getCurrentEndpoint } from './toolSelector.js';
-import { processTextAPI, scrapeUrlAPI } from './api.js';
+import { processTextAPI, processTextAPIStream, scrapeUrlAPI } from './api.js';
 import { translations, getLanguage } from './i18n.js';
 import { generatePDFReport } from './pdfReport.js';
 
@@ -240,24 +240,49 @@ elements.processBtn.addEventListener('click', async () => {
     
     try {
         const options = gatherToolOptions();
-        const responseData = await processTextAPI(endpoint, text, options, currentMediaFile);
-        
-        elements.skeletonContainer.classList.add('hidden');
-        
-        if (responseData.type === 'markdown') {
+        const STREAMING_ENDPOINTS = new Set(['summarize', 'recycle', 'synthesis', 'audio-analysis']);
+        const useStream = STREAMING_ENDPOINTS.has(endpoint);
+
+        if (useStream) {
+            // ⚡ Streaming path: render chunks progressively
+            // الـ skeleton يبقى ظاهراً حتى يصل أول chunk من الخادم
+            let firstChunk = true;
+            const responseData = await processTextAPIStream(
+                endpoint, text, options, currentMediaFile,
+                (fullText) => {
+                    if (firstChunk) {
+                        firstChunk = false;
+                        elements.skeletonContainer.classList.add('hidden');
+                        elements.resultsContent.innerHTML = '';
+                        elements.resultsVisuals.innerHTML = '';
+                        elements.resultsVisuals.classList.add('hidden');
+                        showResultsContainer();
+                        elements.resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                    elements.resultsContent.innerHTML = marked.parse(fullText);
+                }
+            );
             rawMarkdownForDownload = responseData.result;
-            const htmlResult = marked.parse(responseData.result);
-            await renderCascadingHTML(htmlResult);
         } else {
-            rawMarkdownForDownload = JSON.stringify(responseData.result, null, 2);
-            renderJSONVisuals(responseData.type, responseData.result);
+            // Non-streaming path (JSON: bias / truth-guard)
+            const responseData = await processTextAPI(endpoint, text, options, currentMediaFile);
+            elements.skeletonContainer.classList.add('hidden');
+
+            if (responseData.type === 'markdown') {
+                rawMarkdownForDownload = responseData.result;
+                const htmlResult = marked.parse(responseData.result);
+                await renderCascadingHTML(htmlResult);
+            } else {
+                rawMarkdownForDownload = JSON.stringify(responseData.result, null, 2);
+                renderJSONVisuals(responseData.type, responseData.result);
+            }
+            elements.resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-        
+
         showToast('toast.success', 'success');
         localStorage.removeItem(AUTOSAVE_KEY);
         // إعادة جلب السجل ليظهر التقرير الجديد فوراً
         if (typeof window.__refreshHistory === 'function') window.__refreshHistory();
-        elements.resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     } catch (error) {
         console.error('API Error:', error);

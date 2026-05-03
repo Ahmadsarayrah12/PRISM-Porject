@@ -162,3 +162,65 @@ exports.audioAnalysis = catchAsync(async (req, res) => {
     const reportId = await saveReportToDB('audioAnalysis', `Media: ${file.originalname}`, result, options);
     res.status(200).json({ success: true, type: 'markdown', result, reportId });
 });
+
+// ==========================================
+// 🌊 Streaming endpoints (SSE) — markdown only
+// ==========================================
+const setupSSE = (res) => {
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders?.();
+};
+
+const sendSSE = (res, data) => {
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+};
+
+const runStream = async (res, endpoint, inputText, options, streamFactory) => {
+    setupSSE(res);
+    let fullText = '';
+    try {
+        const stream = await streamFactory();
+        for await (const chunk of stream) {
+            fullText += chunk;
+            sendSSE(res, { chunk });
+        }
+        const reportId = await saveReportToDB(endpoint, inputText, fullText, options);
+        sendSSE(res, { done: true, type: 'markdown', reportId });
+    } catch (err) {
+        console.error(`❌ Stream error [${endpoint}]:`, err.message);
+        sendSSE(res, { error: err.message || 'حدث خطأ أثناء الاتصال بالنموذج.' });
+    } finally {
+        res.end();
+    }
+};
+
+exports.summarizeStream = async (req, res) => {
+    const prompt = prompts.summarize(req.body.options);
+    await runStream(res, 'summarize', req.body.text, req.body.options,
+        () => geminiService.callGeminiStream(prompt, req.body.text));
+};
+
+exports.recycleStream = async (req, res) => {
+    const prompt = prompts.recycle(req.body.options);
+    await runStream(res, 'recycle', req.body.text, req.body.options,
+        () => geminiService.callGeminiStream(prompt, req.body.text));
+};
+
+exports.synthesisStream = async (req, res) => {
+    const prompt = prompts.synthesis(req.body.options);
+    await runStream(res, 'synthesis', req.body.text, req.body.options,
+        () => geminiService.callGeminiStream(prompt, req.body.text));
+};
+
+exports.audioAnalysisStream = async (req, res) => {
+    const { file } = req;
+    const options = req.body.options ? JSON.parse(req.body.options) : {};
+    const prompt  = prompts.audioAnalysis(options);
+    const userMsg = 'الرجاء تفريغ هذا المقطع وتحليله بناءً على التعليمات.';
+
+    await runStream(res, 'audioAnalysis', `Media: ${file.originalname}`, options,
+        () => geminiService.callGeminiWithMediaStream(prompt, userMsg, file));
+};

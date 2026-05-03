@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prism-v1';
+const CACHE_NAME = 'prism-v2';
 const urlsToCache = [
   './',
   './index.html',
@@ -22,13 +22,17 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+
+  // تجاوز الـ SW لأي طلبات API — مهم خصوصاً للـ streaming endpoints (SSE)
+  // لأن المتصفح يحتاج تمرير الـ ReadableStream مباشرة دون تخزين أو نسخ
+  if (url.pathname.startsWith('/api/')) return;
+
+  // نُخزِّن فقط طلبات GET (caches API لا تدعم POST)
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
     caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response; // Return cached version if found
-        }
-        return fetch(event.request); // Otherwise fetch from network
-      })
+      .then(response => response || fetch(event.request))
   );
 });

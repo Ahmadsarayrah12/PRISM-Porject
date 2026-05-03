@@ -28,4 +28,12 @@ router.post('/scrape', aiController.scrapeUrl);
 // validateFile يتحقق من وجود الملف ونوعه قبل الوصول للـ controller
 router.post('/audio', upload.single('media'), validateFile, aiController.audioAnalysis);
 
+// ──────────────────────────────────────────────
+// Streaming routes (SSE) — للأدوات التي تُرجع Markdown فقط
+// ──────────────────────────────────────────────
+router.post('/summarize/stream', validateInput, aiController.summarizeStream);
+router.post('/recycle/stream',   validateInput, aiController.recycleStream);
+router.post('/synthesis/stream', validateInput, aiController.synthesisStream);
+router.post('/audio/stream',     upload.single('media'), validateFile, aiController.audioAnalysisStream);
+
 module.exports = router;
