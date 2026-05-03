@@ -1,421 +1,379 @@
-```markdown
-# PRISM — AI-Powered Media Intelligence Platform
+<!-- markdownlint-disable MD033 -->
+<p align="center">
+  <img src="frontend/assets/prism-icon.svg" width="150" alt="Prism Logo"/>
+</p>
 
-<div align="center">
-  <img src="frontend/assets/prism-icon.svg" width="140" alt="Prism Logo"/><br/>
-  <h3>For modern journalism – summarise, fact‑check, repurpose, and synthesise narratives.</h3>
-  <p><strong>Node.js · Express · Gemini 2.5 Pro · MongoDB · Vanilla JS</strong></p>
-  <p>
-    <a href="#-quick-start">Quick Start</a> •
-    <a href="#-api-endpoints">API</a> •
-    <a href="#-deployment">Deployment</a> •
-    <a href="#-security">Security</a>
-  </p>
-</div>
+<h1 align="center">🔮 PRISM — AI-Powered Media Intelligence</h1>
+
+<p align="center">
+  <strong>For modern journalism – summarise, fact‑check, repurpose, and synthesise narratives.</strong><br/>
+  <sub>Node.js · Express · Gemini 2.5 Pro · MongoDB · Vanilla JS</sub>
+</p>
+
+<p align="center">
+  <a href="#-quick-start"><img src="https://img.shields.io/badge/🚀_Quick_Start-blue?style=for-the-badge&logo=node.js&logoColor=white"/></a>
+  <a href="#-api-reference"><img src="https://img.shields.io/badge/📡_API_Reference-blue?style=for-the-badge&logo=fastapi&logoColor=white"/></a>
+  <a href="#-deployment"><img src="https://img.shields.io/badge/☁️_Deployment-blue?style=for-the-badge&logo=googlecloud&logoColor=white"/></a>
+  <a href="#-license"><img src="https://img.shields.io/badge/📄_License-MIT-purple?style=for-the-badge"/></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Node.js-20-brightgreen?logo=node.js"/>
+  <img src="https://img.shields.io/badge/Gemini-2.5_Pro-blue?logo=google"/>
+  <img src="https://img.shields.io/badge/Cloud_Run-Ready-orange?logo=google-cloud"/>
+  <img src="https://img.shields.io/badge/License-MIT-purple"/>
+  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen"/>
+</p>
 
 ---
 
 ## 📖 Table of Contents
 
+<details>
+<summary>Click to expand</summary>
+
 1. [Overview](#-overview)
 2. [Key Features](#-key-features)
 3. [Architecture](#-architecture)
-4. [Technology Stack](#-technology-stack)
+4. [Tech Stack](#-tech-stack)
 5. [Project Structure](#-project-structure)
 6. [Quick Start](#-quick-start)
-   - [Prerequisites](#prerequisites)
-   - [Installation](#installation)
-   - [Environment Variables](#environment-variables)
-   - [Running Locally](#running-locally)
-7. [API Reference](#-api-reference)
-   - [Text Analysis Endpoints](#text-analysis-endpoints)
-   - [Media Analysis Endpoint](#media-analysis-endpoint)
-   - [Streaming (SSE) Endpoints](#streaming-sse-endpoints)
-   - [History Management](#history-management)
-   - [Example cURL Requests](#example-curl-requests)
-8. [Database Schema](#-database-schema)
-9. [Frontend Details](#-frontend-details)
-   - [UI Components](#ui-components)
-   - [Internationalisation (i18n)](#internationalisation-i18n)
-   - [Service Worker & Offline Support](#service-worker--offline-support)
-   - [PDF Export](#pdf-export)
-10. [Security Features](#-security-features)
-11. [Deployment](#-deployment)
-    - [Docker Local Build](#docker-local-build)
-    - [Google Cloud Run (Production)](#google-cloud-run-production)
-    - [Workload Identity (Recommended)](#workload-identity-recommended)
-12. [Troubleshooting & Known Limitations](#-troubleshooting--known-limitations)
-13. [Roadmap](#-roadmap)
-14. [License](#-license)
-15. [Acknowledgements](#-acknowledgements)
+7. [Environment Variables](#-environment-variables)
+8. [API Reference](#-api-reference)
+9. [Database Schema](#-database-schema)
+10. [Frontend Features](#-frontend-features)
+11. [Security](#-security)
+12. [Deployment](#-deployment)
+13. [Troubleshooting](#-troubleshooting)
+14. [Roadmap](#-roadmap)
+15. [License](#-license)
+
+</details>
 
 ---
 
 ## 🧠 Overview
 
-**PRISM** is a SaaS‑grade AI assistant designed for newsrooms, investigative journalists, and content creators. It connects directly to **Google Gemini 2.5 Pro** (via Vertex AI) to provide advanced text and media analysis.
+**PRISM** is a SaaS‑grade AI assistant designed for **newsrooms, investigative journalists, and content creators**. It connects directly to **Google Gemini 2.5 Pro** (via Vertex AI) to provide advanced text and media analysis.
 
-Unlike generic chatbots, PRISM is purpose‑built for journalistic workflows:
+| What PRISM does | Why it matters |
+|----------------|----------------|
+| 📝 **Smart Summarization** | Extract key headlines, stats, and quotes from long reports in seconds. |
+| ⚖️ **Bias Radar** | Detect verbal bias, loaded language, and propaganda. |
+| ♻️ **Content Recycler** | Transform long articles into social media posts (X, LinkedIn, Instagram). |
+| 🛡️ **Truth Guard** | Fact‑check claims, detect logical fallacies, and flag misinformation. |
+| 🔗 **Narrative Synthesis** | Merge multiple sources and expose contradictions. |
+| 🎙️ **Audio/Video Analysis** | Transcribe and fact‑check spoken media. |
 
-- ✅ **Smart summarisation** – extract key headlines, stats, and quotes from long reports.
-- ⚖️ **Bias Radar** – detect verbal bias, loaded language, and propaganda.
-- ♻️ **Content Recycler** – transform news articles into social media content (X, LinkedIn, Instagram).
-- 🛡️ **Truth Guard** – fact‑check claims, detect logical fallacies, and flag misinformation.
-- 🔗 **Narrative Synthesis** – merge multiple sources and expose contradictions.
-- 🎙️ **Audio/Video Analysis** – transcribe and fact‑check spoken media.
-
-All analyses are stored in **MongoDB Atlas**, with history search, favouriting, and PDF export. The frontend is a fully responsive, bilingual (Arabic/English) PWA with dark/light mode and offline support (basic Service Worker).
+All analyses are stored in **MongoDB Atlas**, with **history search, favouriting, and PDF export**. The frontend is a fully responsive, **bilingual (Arabic/English) PWA** with dark/light mode and offline support.
 
 ---
 
 ## ✨ Key Features
 
-| Feature | Description | Output Format |
-|---------|-------------|----------------|
-| **Smart Summarize** | Extracts a concise summary, 3 headlines, important quotes, and statistics. User can choose length (short/standard/detailed) and whether to include quotes. | Markdown |
-| **Bias Radar** | Returns bias percentage (0‑100), list of biased words/phrases, analysis, and a neutral rewrite. | JSON (visual gauge + cards) |
-| **Content Recycler** | Converts an article into posts for selected platforms (X, LinkedIn, Instagram). Customisable tone (formal/engaging/urgent) and audience (general/youth/corporate). | Markdown |
-| **Truth Guard** | Returns credibility score (0‑100), status (safe/warning/danger), detected logical fallacies, suggested questions for sources, and recommendations. | JSON (status banner + cards) |
-| **Narrative Synthesis** | Merges 2+ sources covering the same event, highlights agreed facts, exposes contradictions, and produces a unified neutral report. | Markdown |
-| **Audio/Video Analysis** | Transcribes the media file, then fact‑checks the spoken content. Supports many formats (MP3, WAV, M4A, MP4, AVI, MOV, etc.). Returns transcription + analysis. | Markdown |
-| **URL Scraper** | Extracts main article text from any news URL (with SSRF protection). | Plain text |
-| **Streaming (SSE)** | Real‑time markdown output for summarise, recycle, synthesis, and audio analysis. Gives users a typewriter effect. | Server‑Sent Events (SSE) |
-| **History & Favourites** | Every report is stored in MongoDB. Users can search, filter by tool, mark/unmark favourite, and delete reports. | REST API + UI |
-| **PDF Export** | Generates a clean A4‑formatted PDF report (client‑side using `html2pdf.js`). Supports both Arabic and English with proper RTL layout. 
-| **Dual Language** | Full interface in English and Arabic. i18n system automatically switches prompts and UI labels. 
-| **Dark / Light Mode** | Persistent theme preference (default dark). 
-| **Offline Support** | Basic Service Worker caches static assets (network‑first for HTML/JS). 
+<div align="center">
+
+| Feature | Output Format | Streaming |
+|---------|---------------|-----------|
+| **Smart Summarize** | Markdown | ✅ SSE |
+| **Bias Radar** | JSON (visual gauge) | ❌ |
+| **Content Recycler** | Markdown | ✅ SSE |
+| **Truth Guard** | JSON (status cards) | ❌ |
+| **Narrative Synthesis** | Markdown | ✅ SSE |
+| **URL Scraper** | Plain text | ❌ |
+| **Audio / Video Analysis** | Markdown | ✅ SSE |
+
+</div>
+
+### 🔥 Highlights
+
+- **Real‑time streaming (SSE)** – Watch markdown results appear character by character.
+- **Persistent history** – Every report saved in MongoDB, searchable and filterable.
+- **Bilingual UI** – Full support for English and Arabic (RTL layout).
+- **PDF export** – Generate beautiful A4 reports (client‑side).
+- **Dark/Light mode** – Respects system preference or manual toggle.
+- **Offline‑ready** – Service Worker caches static assets.
 
 ---
 
 ## 🏗️ Architecture
 
+```mermaid
+graph TB
+    A[Frontend<br/>Vanilla JS + Tailwind] -->|Fetch / SSE| B[Express Backend]
+    B --> C[Middlewares<br/>rate‑limit, helmet, validation]
+    C --> D[Controllers<br/>aiController, historyController]
+    D --> E[Services<br/>geminiService]
+    D --> F[(MongoDB Atlas)]
+    E --> G[Vertex AI Gemini 2.5 Pro]
+    E --> H[(GCS Optional<br/>for media >10MB)]
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     Frontend (Vanilla JS)                   │
-│  index.html | app.html | JS modules (ES6) | Tailwind CSS   │
-│      (i18n, dark mode, SSE client, PDF export, history)    │
-└─────────────────────────────┬───────────────────────────────┘
-                              │ HTTP / Fetch / SSE
-┌─────────────────────────────▼───────────────────────────────┐
-│                     Express.js Backend                      │
-│  server.js ── middlewares (rate‑limit, helmet, validation)  │
-│      routes (aiRoutes, historyRoutes)                       │
-│      controllers (aiController, historyController)          │
-│      services (geminiService – Gemini + GCS)                │
-│      models (Report – Mongoose)                             │
-└─────────────────────────────┬───────────────────────────────┘
-                              │ @google/genai
-┌─────────────────────────────▼───────────────────────────────┐
-│              Google Cloud Vertex AI (Gemini 2.5 Pro)        │
-│    (plus optional Google Cloud Storage for media >10 MB)   │
-└─────────────────────────────┬───────────────────────────────┘
-                              │
-┌─────────────────────────────▼───────────────────────────────┐
-│                      MongoDB Atlas                          │
-│         Stores reports (endpoint, input, output,            │
-│         options, favourite flag, createdAt, updatedAt)     │
-└─────────────────────────────────────────────────────────────┘
+
+<details>
+<summary>Plain text representation</summary>
+
+```text
+Frontend (Vanilla JS)
+   │
+   │  Fetch API / SSE
+   ▼
+Express.js Backend
+   ├── Middlewares
+   ├── Routes (AI + History)
+   ├── Controllers
+   ├── Services (Gemini)
+   └── Models (MongoDB)
+   │
+   ▼
+Google Cloud Vertex AI (Gemini 2.5 Pro)
+   │
+   └─ Google Cloud Storage (optional)
 ```
+
+</details>
 
 ---
 
-## 🛠️ Technology Stack
+## 🛠️ Tech Stack
 
-| Layer | Technology | Version / Notes |
-|-------|------------|------------------|
+| Layer | Technology | Version |
+|-------|------------|---------|
 | **Runtime** | Node.js | 20+ |
-| **Framework** | Express.js | 4.19+ |
-| **AI SDK** | `@google/genai` | Official Vertex AI SDK (replaces deprecated `@google-cloud/vertexai`) |
-| **Database** | MongoDB Atlas | Mongoose ODM |
-| **File upload** | Multer | memory storage, 20 MB limit |
-| **Web scraping** | Axios + Cheerio | Extracts article text |
-| **Frontend** | Vanilla JavaScript (ES Modules) | HTML/CSS, Tailwind CSS CDN |
-| **Markdown rendering** | marked.js | Client‑side |
-| **PDF generation** | html2pdf.js | Client‑side (browser only) |
-| **Security** | Helmet, CORS, express‑rate‑limit, DOMPurify | Custom SSRF protection |
-| **Container** | Docker | Alpine‑based, optimised for Cloud Run |
-| **Deployment** | Google Cloud Run | (or any Node.js host) |
+| **Framework** | Express.js | 4.19 |
+| **AI SDK** | `@google/genai` | 1.50+ |
+| **Database** | MongoDB Atlas + Mongoose | 7.x |
+| **File upload** | Multer | 1.4 |
+| **Web scraping** | Axios + Cheerio | 1.7 |
+| **Frontend** | Vanilla JS (ES modules) | - |
+| **Styling** | Tailwind CSS | CDN |
+| **PDF generation** | html2pdf.js | 0.10 |
+| **Security** | Helmet, CORS, rate‑limit | - |
+| **Container** | Docker | Alpine |
+| **Deployment** | Google Cloud Run | - |
 
 ---
 
 ## 📁 Project Structure
 
-```
+<details>
+<summary>Click to expand full tree</summary>
+
+```text
 prism-media/
-├── server.js                     # Entry point: middlewares, static frontend, routes
-├── package.json                  # Dependencies and scripts
-├── .env.example                  # Template for environment variables
-├── .gitignore                    # Excludes secrets and build artifacts
-├── .dockerignore                 # Excludes secrets from Docker image
-├── Dockerfile                    # Multi‑stage build for Cloud Run
+├── server.js                     # Entry point
+├── package.json
+├── .env.example
+├── .gitignore
+├── .dockerignore
+├── Dockerfile
 │
 ├── config/
-│   ├── env.js                    # Centralised environment config
-│   └── db.js                     # MongoDB connection with event listeners
+│   ├── env.js                    # Centralised config
+│   └── db.js                     # MongoDB connection
 │
 ├── controllers/
-│   ├── aiController.js           # 7 AI tools + streaming + DB saving + retry logic
-│   └── historyController.js      # GET /history, DELETE /:id, PATCH /:id/favorite
+│   ├── aiController.js           # 7 AI tools + streaming + retry
+│   └── historyController.js      # CRUD for reports
 │
 ├── routes/
-│   ├── aiRoutes.js               # Routes for /api/summarize, /bias, /recycle, etc.
-│   └── historyRoutes.js          # Routes for /api/history
+│   ├── aiRoutes.js               # /api/summarize, /bias, etc.
+│   └── historyRoutes.js          # /api/history
 │
 ├── middlewares/
-│   ├── errorHandler.js           # Global error handler (sends JSON)
-│   ├── validateInput.js          # Checks text presence and max length (800k chars)
-│   ├── validateFile.js           # Checks file existence, size (≤20MB), MIME type
-│   └── catchAsync.js             # Wrapper to avoid try/catch in controllers
+│   ├── errorHandler.js
+│   ├── validateInput.js          # Text validation
+│   ├── validateFile.js           # File validation (size/type)
+│   └── catchAsync.js
 │
 ├── services/
-│   └── geminiService.js          # Vertex AI client (callGemini, callGeminiWithMedia, streaming versions)
-│                                 # Supports inline (≤10MB) or GCS ( >10MB) for media
+│   └── geminiService.js          # Vertex AI client + GCS support
 │
 ├── utils/
-│   ├── prompts.js                # System prompts for each tool (with LANG_INSTRUCTION)
-│   ├── urlValidator.js           # SSRF protection (block localhost, private IPs, metadata endpoints)
-│   └── catchAsync.js             # Same as above (shared)
+│   ├── prompts.js                # System prompts
+│   ├── urlValidator.js           # SSRF protection
+│   └── catchAsync.js
 │
 ├── models/
-│   └── Report.js                 # Mongoose schema (endpoint, inputText, aiResult, options, favorite, timestamps)
+│   └── Report.js                 # Mongoose schema
 │
-└── frontend/                     # Static files served by Express
+└── frontend/
     ├── index.html                # Landing page
-    ├── app.html                  # Main workspace
-    ├── manifest.json             # PWA manifest
-    ├── sw.js                     # Service Worker (cache strategy)
+    ├── app.html                  # Workspace
+    ├── manifest.json
+    ├── sw.js                     # Service Worker
     ├── assets/
-    │   └── prism-icon.svg        # Logo
+    │   └── prism-icon.svg
     └── js/
-        ├── main.js               # Core logic: tool switching, API calls, auto‑save, media upload, streaming
-        ├── api.js                # processTextAPI, processTextAPIStream, scrapeUrlAPI
-        ├── ui.js                 # DOM elements, toast, counters, JSON visualisation (gauge, cards)
-        ├── i18n.js               # Arabic/English translations and language switching
-        ├── settings.js           # Theme and language persistence
-        ├── toolSelector.js       # Toggle active tool, show/hide options containers
-        ├── sidebar.js            # Mobile sidebar open/close
-        ├── historyManager.js     # Fetch, render, search, filter, favourite, delete history
-        └── pdfReport.js          # Generate bilingual A4 PDF (client‑side)
+        ├── main.js               # Core logic
+        ├── api.js                # API + streaming
+        ├── ui.js                 # UI helpers, visualisations
+        ├── i18n.js               # Arabic/English translations
+        ├── settings.js           # Theme & lang persistence
+        ├── toolSelector.js
+        ├── sidebar.js
+        ├── historyManager.js
+        └── pdfReport.js
 ```
+
+</details>
 
 ---
 
 ## ⚡ Quick Start
 
 ### Prerequisites
-
-- **Node.js** 20+ (LTS recommended)
-- **MongoDB Atlas** account (free tier is enough)
-- **Google Cloud** project with:
-  - Vertex AI API enabled
-  - Gemini 2.5 Pro model available (or change model in `config/env.js`)
-  - Service account key (JSON) with `Vertex AI User` role
-- (Optional) **Google Cloud Storage** bucket if you plan to analyse media files larger than 10 MB.
+- Node.js 20+
+- MongoDB Atlas account (free tier)
+- Google Cloud project with Vertex AI API enabled
+- Service account key (JSON) with Vertex AI User role
+- (Optional) Google Cloud Storage bucket for large media files
 
 ### Installation
 
 ```bash
+# Clone the repository
 git clone https://github.com/Ahmadsarayrah12/PRISM-Porject.git
 cd PRISM-Porject
+
+# Install dependencies
 npm install
 ```
 
 ### Environment Variables
 
-Create a `.env` file in the root based on `.env.example`:
+Create a `.env` file in the root:
 
-```env
+```ini
 # Required
 GOOGLE_CLOUD_PROJECT=your-gcp-project-id
-GOOGLE_CLOUD_LOCATION=us-central1                   # or europe-west4, etc.
-GOOGLE_APPLICATION_CREDENTIALS=./key.json           # path to service account key
-MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/prism?authSource=admin
+GOOGLE_CLOUD_LOCATION=us-central1
+GOOGLE_APPLICATION_CREDENTIALS=./key.json
+MONGO_URI=mongodb+srv://user:pass@cluster.mongodb.net/prism?authSource=admin
 
 # Optional
 PORT=8080
-ALLOWED_ORIGIN=http://localhost:8080                # For CORS, use "*" only in dev
-GCS_BUCKET=your-bucket-name                         # Needed for media >10 MB
-NODE_ENV=development                                 # or "production"
+ALLOWED_ORIGIN=http://localhost:8080
+GCS_BUCKET=your-bucket-name   # for media >10MB
+NODE_ENV=development
 ```
 
-> ⚠️ **Security**: Never commit `.env` or `key.json`. They are already ignored in `.gitignore` and `.dockerignore`.
+> ⚠️ Never commit `.env` or `key.json` – they are excluded via `.gitignore` and `.dockerignore`.
 
-### Running Locally
+### Run Locally
 
 ```bash
 npm start
 ```
 
-Then open [http://localhost:8080](http://localhost:8080).  
-You should see the landing page. Click **Workspace** to start using the tools.
+Open [http://localhost:8080](http://localhost:8080)
 
 ---
 
 ## 🌐 API Reference
 
-Base URL: `http://localhost:8080/api` (or your deployed domain).
-
-All text endpoints accept `POST` with `Content-Type: application/json`.  
-The `options` object is tool‑specific (see below).
+Base URL: `/api`
 
 ### Text Analysis Endpoints
 
-| Endpoint | Method | Request Body | Response | Description |
-|----------|--------|--------------|----------|-------------|
-| `/summarize` | POST | `{ text, options: { length?, quotes? } }` | `{ success, type: "markdown", result, reportId }` | Summarises the article. `length`: `"قصير جداً (نقاط سريعة)"`, `"متوسط"`, `"تفصيلي (تغطية كاملة)"`. `quotes`: boolean. |
-| `/bias` | POST | `{ text, options: { strictness? } }` | `{ success, type: "json_bias", result: { biasScore, biasedWords, analysis, neutralRewrite }, reportId }` | Bias detection. `strictness`: `"متساهل (يقبل الرأي)"`, `"قياسي"`, `"صارم جداً (معايير وكالات الأنباء الدولية)"`. |
-| `/recycle` | POST | `{ text, options: { platforms?, tone?, audience? } }` | `{ success, type: "markdown", result, reportId }` | Social media repurposing. `platforms`: array of strings (e.g. `["X (Twitter)","LinkedIn"]`); `tone`: `"رسمية وإخبارية"`, `"تفاعلية مشوقة"`, `"عاجلة وصادمة"`; `audience`: `"الجمهور العام"`, `"الشباب (Gen Z)"`, `"المتخصصين والمحترفين"`. |
-| `/truth-guard` | POST | `{ text, options: { checkType? } }` | `{ success, type: "json_truth", result: { status, credibilityScore, fallacies, questionsForSource, recommendations }, reportId }` | Fact‑checking. `checkType`: `"تدقيق النص بالكامل"`, `"تدقيق الأرقام والإحصائيات فقط"`, `"تدقيق تصريح أو اقتباس محدد"`. |
-| `/synthesis` | POST | `{ text }` | `{ success, type: "markdown", result, reportId }` | Merge multiple sources (paste 2‑3 articles separated by blank lines). |
-| `/scrape` | POST | `{ url }` | `{ success, text }` | Extracts main text from a news article URL. |
-
-### Media Analysis Endpoint
-
-| Endpoint | Method | Request Body | Response | Description |
-|----------|--------|--------------|----------|-------------|
-| `/audio` | POST | `multipart/form-data` with `media` file (field name `"media"`) and optional `options` (JSON string) | `{ success, type: "markdown", result, reportId }` | Transcribes and fact‑checks an audio or video file (≤20 MB). Supported MIME types: audio/*, video/* (see `validateFile.js` for full list). |
+| Method | Endpoint | Request Body | Response Type | Description |
+|--------|----------|--------------|---------------|-------------|
+| POST | `/summarize` | `{ text, options: { length, quotes } }` | Markdown | Smart summarisation |
+| POST | `/bias` | `{ text, options: { strictness } }` | JSON (bias gauge) | Bias detection |
+| POST | `/recycle` | `{ text, options: { platforms, tone, audience } }` | Markdown | Social media repurposing |
+| POST | `/truth-guard` | `{ text, options: { checkType } }` | JSON (status cards) | Fact‑checking |
+| POST | `/synthesis` | `{ text }` | Markdown | Multi‑source synthesis |
+| POST | `/scrape` | `{ url }` | Plain text | Extract article from URL |
+| POST | `/audio` | `multipart/form-data` (field `media`) | Markdown | Transcribe + analyse media |
 
 ### Streaming (SSE) Endpoints
 
-These endpoints return `text/event-stream`. Client receives `{ chunk }` events and a final `{ done, reportId }`.
+Add `/stream` suffix to the above markdown endpoints:
+- `/summarize/stream`
+- `/recycle/stream`
+- `/synthesis/stream`
+- `/audio/stream`
 
-| Endpoint | Same as | Description |
-|----------|---------|-------------|
-| `/summarize/stream` | `/summarize` | Streams markdown output. |
-| `/recycle/stream` | `/recycle` | Streams markdown output. |
-| `/synthesis/stream` | `/synthesis` | Streams markdown output. |
-| `/audio/stream` | `/audio` | Streams transcription + analysis. |
+Returns `text/event-stream` with `{ chunk }` and final `{ done, reportId }`.
 
-### History Management
+### History Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/history` | GET | Returns `{ success, data: Report[] }` (last 50 reports, most recent first). |
-| `/api/history/:id` | DELETE | Deletes a report. Returns `{ success, message }`. |
-| `/api/history/:id/favorite` | PATCH | Toggles the `favorite` boolean. Returns `{ success, data: { _id, favorite } }`. |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/history` | Get last 50 reports |
+| DELETE | `/api/history/:id` | Delete a report |
+| PATCH | `/api/history/:id/favorite` | Toggle favourite flag |
 
-### Example cURL Requests
-
-#### Summarize (standard)
+### Example cURL
 
 ```bash
+# Summarize
 curl -X POST http://localhost:8080/api/summarize \
   -H "Content-Type: application/json" \
-  -d '{
-    "text": "The president announced a new climate initiative...",
-    "options": { "length": "متوسط", "quotes": true }
-  }'
-```
+  -d '{"text":"Article text...","options":{"length":"متوسط","quotes":true}}'
 
-#### Bias (JSON response)
-
-```bash
+# Bias
 curl -X POST http://localhost:8080/api/bias \
   -H "Content-Type: application/json" \
-  -d '{
-    "text": "The opposition party has once again failed to present a viable plan.",
-    "options": { "strictness": "قياسي" }
-  }'
-```
+  -d '{"text":"The opposition failed...","options":{"strictness":"قياسي"}}'
 
-#### Audio analysis with file upload
-
-```bash
-curl -X POST http://localhost:8080/api/audio \
-  -F "media=@interview.mp3" \
-  -F "options={\"length\":\"standard\"}"
-```
-
-#### Streaming (SSE) example
-
-```bash
+# Streaming
 curl -N -X POST http://localhost:8080/api/summarize/stream \
   -H "Content-Type: application/json" \
-  -d '{"text":"... long article ..."}'
-```
-
-#### Get history
-
-```bash
-curl http://localhost:8080/api/history
+  -d '{"text":"Long article..."}'
 ```
 
 ---
 
-## 🗄️ Database Schema
+## 🗄️ Database Schema (MongoDB)
 
-**Collection: `reports`** (Mongoose model `Report`)
+**Collection:** `reports`
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `endpoint` | string (enum) | One of `summarize`, `bias`, `recycle`, `truthGuard`, `synthesis`, `audioAnalysis` |
-| `inputText` | string | The original text (or filename for media) |
-| `aiResult` | mixed | String (markdown) or Object (JSON for bias/truth) |
-| `language` | string | `"auto"` (future use) |
-| `options` | object | The tool‑specific options used |
-| `favorite` | boolean | Default `false` |
-| `createdAt` | Date | Auto‑set by Mongoose |
-| `updatedAt` | Date | Auto‑set by Mongoose |
-
-Indexes: `favorite` is indexed for faster filtering.
+| `endpoint` | string | `summarize`, `bias`, `recycle`, `truthGuard`, `synthesis`, `audioAnalysis` |
+| `inputText` | string | Original text or filename |
+| `aiResult` | mixed | Markdown string or JSON object |
+| `options` | object | Tool‑specific options |
+| `favorite` | boolean | Default false |
+| `createdAt` | Date | Auto‑generated |
+| `updatedAt` | Date | Auto‑generated |
 
 ---
 
-## 🎨 Frontend Details
+## 🎨 Frontend Features
 
-### UI Components
-
-- **Landing page** (`index.html`): Showcases tools, call‑to‑action, theme/language switchers.
-- **Workspace** (`app.html`): Main interface with:
-  - Sidebar (tool selection, history list, theme/lang)
-  - Editor area (text input, URL scraper bar, file dropzone)
-  - Tool‑specific options panels (summarize, bias, recycle, truth‑guard)
-  - Result area (skeleton loader, markdown/JSON visualisation, export buttons)
-- **Responsive**: Mobile sidebar toggle, flexible layout.
-
-### Internationalisation (i18n)
-
-- Located in `frontend/js/i18n.js`.
-- Supports `ar` (Arabic, RTL) and `en` (English, LTR).
-- All UI text uses `data-i18n`, `data-i18n-placeholder`, `data-i18n-title` attributes.
-- Language preference is stored in `localStorage` and applied dynamically.
-- Tool prompts (sent to Gemini) automatically include `LANG_INSTRUCTION` to force response in the same language as the input.
-
-### Service Worker & Offline Support
-
-- **`sw.js`**: Caches static assets (HTML, JS, CSS, manifest, logo).
-- **Network‑first** for HTML and JS files: tries network first, falls back to cache.
-- **Cache‑first** for other assets (icons, etc.).
-- **Bypasses** all `/api/*` requests to avoid breaking SSE streams and dynamic responses.
-
-### PDF Export
-
-- **`pdfReport.js`**: Client‑side PDF generation using `html2pdf.js`.
-- Captures the content of `#results-container`, injects it into a clean `#print-wrapper` with custom print styles.
-- Detects language (Arabic/English) and applies proper RTL/LTR, fonts, and layout.
-- Adds header (logo, tool name, date) and footer on each page.
-- Works entirely in the browser – no server load.
+| Feature | Description |
+|---------|-------------|
+| **Bilingual UI** | `i18n.js` provides Arabic/English translations, RTL/LTR switching. |
+| **Dark/Light mode** | Persistent via localStorage, follows system or manual toggle. |
+| **Responsive design** | Mobile sidebar, flexible grid, touch‑friendly elements. |
+| **History panel** | Search, filter by tool, mark favourite, delete, load previous reports. |
+| **PDF export** | Client‑side generation with proper A4 layout, bilingual headers, page numbers. |
+| **Auto‑save drafts** | Text is saved to localStorage and restored on page load. |
+| **Real‑time stats** | Real‑time word count & reading time estimate. |
+| **URL scraper** | Paste a news URL to auto‑fill the editor. |
+| **File dropzone** | Drag & drop audio/video files. |
+| **Skeleton loader** | Skeleton loader and smooth animations. |
 
 ---
 
-## 🔒 Security Features
+## 🔒 Security
 
 | Measure | Implementation |
 |---------|----------------|
-| **Input validation** | `validateInput.js` rejects empty or over‑sized text (>800k chars). |
-| **File validation** | `validateFile.js` checks MIME type (audio/video whitelist), size ≤20 MB. |
-| **SSRF protection** | `urlValidator.js` blocks `localhost`, `127.0.0.1`, private IP ranges, and metadata endpoints (169.254.169.254). |
-| **Rate limiting** | `express-rate-limit` – 100 requests per 15 minutes per IP (configurable). |
-| **CORS** | Controlled via `ALLOWED_ORIGIN` env var (default `*` only in dev). |
-| **Helmet** | Sets secure HTTP headers (CSP temporarily disabled for Tailwind CDN). |
-| **No secrets in Docker** | `.dockerignore` excludes `.env`, `key.json`, logs, node_modules. |
-| **XSS prevention** | Client‑side `DOMPurify` sanitises rendered HTML. |
-| **Global error handler** | Does not leak stack traces in production. |
+| **Input validation** | `validateInput.js`: max 800k chars, non‑empty. |
+| **File validation** | `validateFile.js`: allowed MIME types (`audio/`, `video/`), max 20 MB. |
+| **SSRF protection** | `urlValidator.js`: blocks localhost, private IPs, metadata endpoints. |
+| **Rate limiting** | 100 requests per 15 min per IP (configurable). |
+| **CORS** | Restricted via `ALLOWED_ORIGIN` env var. |
+| **Helmet** | Sets secure HTTP headers (CSP disabled temporarily for Tailwind CDN). |
+| **Secrets exclusion** | `.dockerignore` and `.gitignore` prevent `.env`, `key.json`. |
+| **XSS prevention** | Client‑side `DOMPurify` sanitises markdown output. |
+| **Error handling** | Global handler hides stack traces in production. |
 
 ---
 
-## 🚀 Deployment
+## ☁️ Deployment
 
 ### Docker Local Build
 
@@ -426,103 +384,79 @@ docker run -p 8080:8080 --env-file .env prism-media
 
 ### Google Cloud Run (Production)
 
-> **Recommended**: Use Workload Identity instead of a service account key file.
-
-#### 1. Prepare your project
-Enable Artifact Registry, Cloud Run, Vertex AI API, and (optional) Cloud Storage.
-
-#### 2. Build and push image
+**1. Build and push**
 
 ```bash
-gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/prism-media
+gcloud builds submit --tag gcr.io/YOUR_PROJECT/prism-media
 ```
 
-#### 3. Deploy without embedding secrets
+**2. Deploy**
 
 ```bash
 gcloud run deploy prism-media \
-  --image gcr.io/YOUR_PROJECT_ID/prism-media \
+  --image gcr.io/YOUR_PROJECT/prism-media \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated \
-  --set-env-vars GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID,GOOGLE_CLOUD_LOCATION=us-central1,MONGO_URI="your_mongo_uri"
+  --set-env-vars GOOGLE_CLOUD_PROJECT=YOUR_PROJECT,GOOGLE_CLOUD_LOCATION=us-central1,MONGO_URI="your_mongo_uri"
 ```
 
-> ⚠️ Do **not** set `GOOGLE_APPLICATION_CREDENTIALS` when using Workload Identity.
+> 💡 Do not set `GOOGLE_APPLICATION_CREDENTIALS`; use Workload Identity instead.
 
 ### Workload Identity (Recommended)
 
-Follow [Google's guide](https://cloud.google.com/run/docs/configuring/service-accounts#workload-identity) to create a service account and grant it:
+Create a service account and grant:
 
-- `roles/aiplatform.user` (Vertex AI User)
+- `roles/aiplatform.user`
 - `roles/storage.objectViewer` (if using GCS)
-- `roles/run.invoker` (for Cloud Run)
+- `roles/run.invoker`
 
-Then deploy with the service account:
-
-```bash
-gcloud run deploy prism-media \
-  --service-account=SA_EMAIL@PROJECT.iam.gserviceaccount.com \
-  ... (other flags as above)
-```
-
-The runtime will automatically obtain credentials from the environment – no key file needed.
+Deploy with `--service-account=SA_EMAIL`. No key file needed.
 
 ---
 
-## ❗ Troubleshooting & Known Limitations
+## ❗ Troubleshooting
 
-### Common Issues
-
-| Problem | Likely cause | Solution |
-|---------|--------------|----------|
-| `bad auth` on MongoDB | Wrong password or missing `authSource=admin` | Add `?authSource=admin` to `MONGO_URI`. |
-| `429 Resource exhausted` | Gemini rate limit / quota exceeded | Implemented retry logic (3 attempts, exponential backoff). Increase quota or reduce concurrency. |
-| `413 Payload Too Large` | Text >800k characters or file >20 MB | Split text or use GCS for larger media. |
-| `CORS error` | Frontend origin not allowed | Set `ALLOWED_ORIGIN` to your frontend URL (e.g., `https://yourdomain.com`). |
-| SSE not working | Reverse proxy buffering | Ensure `X-Accel-Buffering: no` header is set (already done in `aiController.js`). |
-
-### Known Limitations
-
-- **CSP disabled** – Content Security Policy is turned off via Helmet to allow Tailwind CDN. For production, implement a strict CSP that permits only trusted CDNs.
-- **History pagination** – Only last 50 reports are returned. Large histories may slow down the frontend.
-- **No user authentication** – All analyses are shared across all users. Add JWT / OAuth for multi‑tenant use.
-- **Streaming not supported for bias/truth‑guard** – Those endpoints return JSON, not markdown. Could be extended.
-- **Large media files ( >10 MB) require GCS** – Without a bucket, they will be rejected.
-- **Scraper may fail on JS‑heavy sites** – Works best with static HTML news articles.
+| Error | Likely cause | Solution |
+|-------|--------------|----------|
+| `bad auth` (MongoDB) | Wrong password or missing `authSource=admin` | Add `?authSource=admin` to `MONGO_URI`. |
+| `429 Resource exhausted`| Gemini rate limit | Built‑in retry (3 attempts, exponential backoff). Requests 429 – wait and retry. |
+| `413 Payload Too Large`| Text >800k chars or file >20 MB | Split input or use GCS for media >10 MB. |
+| `CORS error` | Frontend origin not allowed | Set `ALLOWED_ORIGIN` to your frontend URL. |
+| SSE not streaming | Reverse proxy buffering | Ensure `X-Accel-Buffering: no` header (already set). |
 
 ---
 
 ## 🗺️ Roadmap
 
-- [ ] **User authentication** (JWT, Google OAuth) and per‑user history.
-- [ ] **Pagination** for `/api/history` with `?page` and `?limit`.
-- [ ] **Strict CSP** for production.
-- [ ] **Batch URL processing** – analyse multiple articles at once.
-- [ ] **Webhook support** – send results to external systems.
-- [ ] **More languages** – French, Spanish, etc.
-- [ ] **Mobile app** (React Native wrapper).
+- [ ] User authentication (JWT, Google OAuth)
+- [ ] Pagination for `/api/history`
+- [ ] Strict CSP for production
+- [ ] Batch URL processing
+- [ ] Webhook notifications
+- [ ] Mobile app (React Native)
 
 ---
 
 ## 📄 License
 
-MIT © 2026 Prism Media — Built for free press.  
+MIT © 2026 Prism Media — Built for free press.
 صُنع للصحافة الحرة.
 
 ---
 
 ## 🙏 Acknowledgements
 
-- [Google Gemini](https://deepmind.google/technologies/gemini/) – Vertex AI team for the `@google/genai` SDK.
-- [Tailwind CSS](https://tailwindcss.com/) – Utility‑first CSS framework.
-- [marked.js](https://marked.js.org/) – Markdown parser.
-- [DOMPurify](https://github.com/cure53/DOMPurify) – XSS sanitizer.
-- [html2pdf.js](https://github.com/eKoopmans/html2pdf.js) – Client‑side PDF generation.
-- [MongoDB Atlas](https://www.mongodb.com/atlas) – Free cloud database.
+- Google Gemini – Vertex AI SDK.
+- Tailwind CSS – Utility CSS framework.
+- marked.js – Markdown parser.
+- DOMPurify – XSS sanitizer.
+- html2pdf.js – Client‑side PDF.
+- MongoDB Atlas – Cloud database.
 
----
+<br>
 
-**Happy reporting with PRISM!**  
-For questions or contributions, please open an issue on GitHub.
-```
+<p align="center"> 
+  <sub>Made with ❤️ for journalists and fact‑checkers.</sub><br/> 
+  <sub>Questions? Open an issue on <a href="https://github.com/Ahmadsarayrah12/PRISM-Porject">GitHub</a>.</sub> 
+</p>
