@@ -1,4 +1,4 @@
-import { elements, showToast, hideResults, renderCascadingHTML, renderJSONVisuals, showResultsContainer, updateCounters, updateFileCounter } from './ui.js';
+import { elements, showToast, hideResults, renderCascadingHTML, renderJSONVisuals, showResultsContainer, updateCounters, updateFileCounter, hideEmptyState } from './ui.js';
 import { selectTool, getCurrentEndpoint } from './toolSelector.js';
 import { processTextAPI, processTextAPIStream, scrapeUrlAPI } from './api.js';
 import { translations, getLanguage } from './i18n.js';
@@ -236,8 +236,9 @@ elements.processBtn.addEventListener('click', async () => {
     `;
     
     hideResults();
+    hideEmptyState();
     setTimeout(() => elements.skeletonContainer.classList.remove('hidden'), 300);
-    
+
     try {
         const options = gatherToolOptions();
         const STREAMING_ENDPOINTS = new Set(['summarize', 'recycle', 'synthesis', 'audio-analysis']);
@@ -256,12 +257,14 @@ elements.processBtn.addEventListener('click', async () => {
                         elements.resultsContent.innerHTML = '';
                         elements.resultsVisuals.innerHTML = '';
                         elements.resultsVisuals.classList.add('hidden');
+                        elements.resultsContent.classList.add('is-streaming');
                         showResultsContainer();
                         elements.resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                     elements.resultsContent.innerHTML = marked.parse(fullText);
                 }
             );
+            elements.resultsContent.classList.remove('is-streaming');
             rawMarkdownForDownload = responseData.result;
         } else {
             // Non-streaming path (JSON: bias / truth-guard)
@@ -287,6 +290,7 @@ elements.processBtn.addEventListener('click', async () => {
     } catch (error) {
         console.error('API Error:', error);
         elements.skeletonContainer.classList.add('hidden');
+        elements.resultsContent.classList.remove('is-streaming');
         showToast('toast.error', 'error');
     } finally {
         isProcessing = false;

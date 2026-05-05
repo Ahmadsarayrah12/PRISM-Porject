@@ -1,3 +1,22 @@
-node_modules/
+# ملفات البيئة والمفاتيح الخاصة
 .env
+.env.local
+.env.*.local
 key.json
+*.key
+*.pem
+
+# اعتماديات Node.js
+node_modules/
+
+# ملفات النظام والإعدادات الخاصة بمحرر النصوص
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/
+
+# سجلات التشغيل وملفات مؤقتة
+logs
+*.log
+npm-debug.log*

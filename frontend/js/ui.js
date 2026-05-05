@@ -8,6 +8,7 @@ export const elements = {
     wordCount:         document.getElementById('word-count'),
     wordCountLabel:    document.querySelector('[data-i18n="editor.wordcount"]'),
     skeletonContainer: document.getElementById('skeleton-container'),
+    emptyState:        document.getElementById('empty-state'),
     resultsContainer:  document.getElementById('results-container'),
     resultsVisuals:    document.getElementById('results-visuals'),
     resultsContent:    document.getElementById('results-content'),
@@ -22,6 +23,9 @@ export const elements = {
     mediaInput:        document.getElementById('media-input'),
     fileNameDisplay:   document.getElementById('file-name-display'),
 };
+
+export const hideEmptyState = () => elements.emptyState?.classList.add('hidden');
+export const showEmptyState = () => elements.emptyState?.classList.remove('hidden');
 
 export const showToast = (messageKey, type = 'success') => {
     const lang = getLanguage();
@@ -45,6 +49,7 @@ export const showToast = (messageKey, type = 'success') => {
 
 export const hideResults = () => {
     elements.resultsContainer.classList.add('opacity-0', 'scale-95');
+    elements.resultsContent.classList.remove('is-streaming');
     setTimeout(() => {
         elements.resultsContainer.classList.add('hidden');
         elements.resultsContent.innerHTML = '';
@@ -54,8 +59,9 @@ export const hideResults = () => {
 };
 
 export const showResultsContainer = () => {
+    hideEmptyState();
     elements.resultsContainer.classList.remove('hidden');
-    void elements.resultsContainer.offsetWidth; 
+    void elements.resultsContainer.offsetWidth;
     elements.resultsContainer.classList.remove('opacity-0', 'scale-95');
     elements.resultsContainer.classList.add('opacity-100', 'scale-100');
 };

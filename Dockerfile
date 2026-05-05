@@ -13,6 +13,10 @@ RUN npm install --production
 # نسخ جميع ملفات المشروع إلى الحاوية
 COPY . .
 
+# ⚠️ ملاحظة مهمة:
+# لا تنسخ .env — استخدم متغيرات البيئة من Cloud Run
+# إذا احتجت key.json، استخدم Secret Manager أو ضعه في المتغيرات
+
 # فتح المنفذ 8080 (المنفذ الافتراضي الذي يعتمد عليه Google Cloud Run)
 EXPOSE 8080
 

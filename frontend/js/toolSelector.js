@@ -1,4 +1,4 @@
-import { elements, hideResults } from './ui.js';
+import { elements, hideResults, showEmptyState } from './ui.js';
 
 export let currentEndpoint = 'summarize';
 
@@ -44,4 +44,5 @@ export const selectTool = (endpoint) => {
     }
 
     hideResults();
+    showEmptyState();
 };

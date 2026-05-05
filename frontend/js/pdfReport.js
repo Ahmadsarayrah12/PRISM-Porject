@@ -34,18 +34,76 @@ const I18N = {
 // ─── 2. CONFIGURATION ────────────────────────────────────────
 const REPORT_CONFIG = {
   brandName:    'PRISM',
-  accentColor:  '#2563eb',
   dangerColor:  '#dc2626',
   warningColor: '#d97706',
   successColor: '#16a34a',
   fontDisplayAr: "'Cairo', 'Tajawal', 'Segoe UI', sans-serif",
   fontBodyAr:    "'Cairo', 'Tajawal', 'Segoe UI', sans-serif",
-  fontDisplayEn: "'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
-  fontBodyEn:    "'Georgia', 'Times New Roman', serif",
-  // A4 at 96dpi = 794px wide, 1123px tall
-  // Margins: top/bottom 15mm, left/right 15mm
+  fontDisplayEn: "'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+  fontBodyEn:    "'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
   pageMarginH:  '15mm',
   pageMarginV:  '15mm',
+};
+
+// ─── 2.b TOOL PALETTES ───────────────────────────────────────
+// Each tool gets a brand identity that flows through the report.
+const TOOL_PALETTE = {
+  'summarize':      { accent: '#2563eb', accentSoft: '#dbeafe', accentDeep: '#1e3a8a', label: { ar: 'تلخيص ذكي',    en: 'Smart Summary'  } },
+  'bias':           { accent: '#d97706', accentSoft: '#fef3c7', accentDeep: '#78350f', label: { ar: 'قياس الموضوعية', en: 'Bias Radar'     } },
+  'recycle':        { accent: '#0d9488', accentSoft: '#ccfbf1', accentDeep: '#134e4a', label: { ar: 'إعادة التدوير',  en: 'Content Recycler'} },
+  'truth-guard':    { accent: '#059669', accentSoft: '#d1fae5', accentDeep: '#064e3b', label: { ar: 'درع الحقيقة',    en: 'Truth Guard'     } },
+  'synthesis':      { accent: '#7c3aed', accentSoft: '#ede9fe', accentDeep: '#4c1d95', label: { ar: 'مُحقق الروايات',  en: 'Story Synthesis' } },
+  'audio-analysis': { accent: '#db2777', accentSoft: '#fce7f3', accentDeep: '#831843', label: { ar: 'تفريغ الوسائط',  en: 'Media Analysis'  } },
+};
+
+// ─── 2.c THEME PALETTES (light + dark) ───────────────────────
+// CSS custom properties driven by these — every styled element
+// references vars so swapping themes is one substitution.
+const THEME_PALETTE = {
+  light: {
+    bg:           '#ffffff',
+    text:         '#0f172a',
+    textStrong:   '#020617',
+    textMuted:    '#475569',
+    textSubtle:   '#64748b',
+    border:       '#e2e8f0',
+    borderSoft:   '#f1f5f9',
+    cardBg:       '#ffffff',
+    panelBg:      '#f8fafc',
+    stripeBg:     '#f8fafc',
+    codeBg:       '#f1f5f9',
+    codeText:     '#1e293b',
+    codeBorder:   '#cbd5e1',
+    quoteBg:      '#eff6ff',
+    quoteText:    '#1e3a8a',
+    pageRule:     '#94a3b8',
+  },
+  dark: {
+    bg:           '#0b1220',  // deeper than slate-950 for richer print
+    text:         '#e2e8f0',
+    textStrong:   '#f8fafc',
+    textMuted:    '#cbd5e1',
+    textSubtle:   '#94a3b8',
+    border:       '#1f2937',
+    borderSoft:   '#111827',
+    cardBg:       '#111827',
+    panelBg:      '#0f172a',
+    stripeBg:     '#0f172a',
+    codeBg:       '#0f172a',
+    codeText:     '#cbd5e1',
+    codeBorder:   '#1e293b',
+    quoteBg:      'rgba(59,130,246,0.08)',
+    quoteText:    '#93c5fd',
+    pageRule:     '#475569',
+  },
+};
+
+// ─── 2.d PLATFORM BRAND COLORS (for Recycle reports) ─────────
+const PLATFORM_BRAND = {
+  'x':         { match: /^\s*(x\s*\(twitter\)|twitter|x)\b/i,        color: '#0f1419', label: 'X' },
+  'linkedin':  { match: /^\s*linkedin\b/i,                            color: '#0a66c2', label: 'LinkedIn' },
+  'instagram': { match: /^\s*instagram\b/i,                           color: '#ee2a7b', label: 'Instagram' },
+  'facebook':  { match: /^\s*facebook\b/i,                            color: '#1877f2', label: 'Facebook' },
 };
 
 
@@ -71,6 +129,15 @@ const detectLanguage = () => {
 
 
 // ─── 4. METADATA BUILDER ─────────────────────────────────────
+const detectActiveTool = () => {
+  const btn = document.querySelector('.tool-btn.active');
+  return btn?.getAttribute('data-endpoint') || 'summarize';
+};
+
+const detectTheme = () => {
+  return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+};
+
 const buildMeta = () => {
   const lang  = detectLanguage();
   const isRtl = lang === 'ar';
@@ -82,18 +149,23 @@ const buildMeta = () => {
   const date   = now.toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' });
   const time   = now.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 
-  const toolLabel =
-    document.querySelector('[data-active-tool]')?.dataset.activeToolLabel ??
-    document.querySelector('.tool-title, .analysis-title, h2')?.textContent?.trim() ??
+  const activeTool = detectActiveTool();
+  const palette    = TOOL_PALETTE[activeTool] || TOOL_PALETTE.summarize;
+  const toolLabel  =
+    palette.label[lang] ??
+    document.querySelector('#current-tool-title')?.textContent?.trim() ??
     t.defaultTool;
 
-  return { lang, dir, isRtl, t, date, time, toolLabel };
+  const theme       = detectTheme();
+  const themeColors = THEME_PALETTE[theme];
+
+  return { lang, dir, isRtl, t, date, time, toolLabel, activeTool, palette, theme, themeColors };
 };
 
 
 // ─── 5. PRINT STYLES ─────────────────────────────────────────
 const buildPrintStyles = (meta) => {
-  const { dir, isRtl, t } = meta;
+  const { dir, isRtl, palette, themeColors, theme } = meta;
 
   const fontDisplay = isRtl ? REPORT_CONFIG.fontDisplayAr : REPORT_CONFIG.fontDisplayEn;
   const fontBody    = isRtl ? REPORT_CONFIG.fontBodyAr    : REPORT_CONFIG.fontBodyEn;
@@ -101,16 +173,27 @@ const buildPrintStyles = (meta) => {
   const blockStart = isRtl ? 'right' : 'left';
   const blockEnd   = isRtl ? 'left'  : 'right';
   const metaAlign  = isRtl ? 'left'  : 'right';
-  const brandAlign = isRtl ? 'right' : 'left';
+
+  // Resolve dynamic accent (per-tool) and theme tokens
+  const ACCENT       = palette.accent;
+  const ACCENT_SOFT  = palette.accentSoft;
+  const ACCENT_DEEP  = palette.accentDeep;
+  const c            = themeColors;
+  const isDark       = theme === 'dark';
+
+  // Heading colors adapt: in dark theme use light tints of accent
+  const h1Color = isDark ? c.textStrong : c.textStrong;
+  const h2Color = isDark ? c.textStrong : ACCENT_DEEP;
+  const h3Color = isDark ? c.textMuted  : ACCENT_DEEP;
 
   return /* css */ `
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;900&family=Tajawal:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;900&family=Inter:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700&display=swap');
 
 /* ══════════════════════════════════════════════════
-   PRISM PRINT STYLES v4.1  —  Multi-page A4 flex
+   PRISM PRINT STYLES v5.0  —  Dynamic theme + tool accent
+   theme=${theme} · tool=${meta.activeTool}
    ══════════════════════════════════════════════════ */
 
-/* Hide the print wrapper on screen — it's only for the print pass */
 #print-wrapper { display: none; }
 
 @media print {
@@ -119,12 +202,13 @@ const buildPrintStyles = (meta) => {
   @page {
     size: A4 portrait;
     margin: ${REPORT_CONFIG.pageMarginV} ${REPORT_CONFIG.pageMarginH};
+    background: ${c.bg};
 
     @bottom-${blockEnd} {
       content: counter(page) " / " counter(pages);
       font-family: ${fontDisplay};
       font-size: 8pt;
-      color: #94a3b8;
+      color: ${c.pageRule};
     }
 
     @bottom-${blockStart} {
@@ -132,17 +216,13 @@ const buildPrintStyles = (meta) => {
       font-family: ${fontDisplay};
       font-size: 8pt;
       font-weight: 700;
-      color: ${REPORT_CONFIG.accentColor};
+      color: ${ACCENT};
       letter-spacing: 1pt;
     }
   }
 
   @page :first { margin-top: ${REPORT_CONFIG.pageMarginV}; }
 
-  /* ── Hide everything except the print wrapper ──── */
-  /* Use display:none on body's direct children so layout reflows
-     and the print wrapper is the only element painted. This lets
-     the browser paginate the content naturally across pages. */
   body > *:not(#print-wrapper) { display: none !important; }
 
   #download-btn, #copy-btn, #share-btn, #fullscreen-btn,
@@ -152,11 +232,13 @@ const buildPrintStyles = (meta) => {
   }
 
   html, body {
-    background: #ffffff !important;
+    background: ${c.bg} !important;
     margin: 0 !important;
     padding: 0 !important;
     height: auto !important;
     overflow: visible !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   /* ── Wrapper: normal flow, lets content paginate ── */
@@ -169,13 +251,13 @@ const buildPrintStyles = (meta) => {
     inset: auto !important;
     margin: 0 !important;
     padding: 0 !important;
-    background: #ffffff !important;
+    background: ${c.bg} !important;
     overflow: visible !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  /* ── Inner page: natural flow, no height constraint */
+  /* ── Inner page: natural flow ───────────────────── */
   #print-page {
     display: block;
     width: 100%;
@@ -184,23 +266,23 @@ const buildPrintStyles = (meta) => {
     font-family: ${fontBody};
     font-size: 10.5pt;
     line-height: ${isRtl ? '1.9' : '1.65'};
-    color: #0f172a !important;
+    color: ${c.text} !important;
     direction: ${dir};
     text-align: ${blockStart};
-    background: #ffffff !important;
+    background: ${c.bg} !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  /* ── Top accent bar (first page only) ───────────── */
+  /* ── Top accent bar (tool-tinted gradient) ──────── */
   #print-page::before {
     content: "";
     display: block;
     width: 100%;
-    height: 4pt;
-    background: linear-gradient(90deg, ${REPORT_CONFIG.accentColor}, #7c3aed) !important;
+    height: 5pt;
+    background: linear-gradient(90deg, ${ACCENT} 0%, ${ACCENT_DEEP} 100%) !important;
     border-radius: 2pt;
-    margin-bottom: 10pt;
+    margin-bottom: 12pt;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -211,9 +293,9 @@ const buildPrintStyles = (meta) => {
     flex-direction: ${isRtl ? 'row-reverse' : 'row'};
     align-items: flex-start;
     justify-content: space-between;
-    padding-bottom: 10pt;
+    padding-bottom: 12pt;
     margin-bottom: 18pt;
-    border-bottom: 1.5pt solid #e2e8f0;
+    border-bottom: 1.5pt solid ${c.border};
     page-break-inside: avoid;
     break-inside: avoid;
     direction: ${dir};
@@ -223,15 +305,15 @@ const buildPrintStyles = (meta) => {
     display: flex;
     flex-direction: column;
     align-items: flex-${isRtl ? 'end' : 'start'};
-    gap: 2pt;
+    gap: 3pt;
   }
 
   .prism-print-header__logo {
     font-family: ${fontDisplay};
-    font-size: 20pt;
+    font-size: 22pt;
     font-weight: 900;
-    letter-spacing: ${isRtl ? '0' : '-0.5px'};
-    color: ${REPORT_CONFIG.accentColor} !important;
+    letter-spacing: ${isRtl ? '0' : '2pt'};
+    color: ${ACCENT} !important;
     line-height: 1;
     direction: ltr;
   }
@@ -240,9 +322,9 @@ const buildPrintStyles = (meta) => {
     font-family: ${fontDisplay};
     font-size: ${isRtl ? '8.5pt' : '7.5pt'};
     font-weight: ${isRtl ? '600' : '500'};
-    letter-spacing: ${isRtl ? '0' : '1.5px'};
+    letter-spacing: ${isRtl ? '0' : '1.5pt'};
     text-transform: ${isRtl ? 'none' : 'uppercase'};
-    color: #64748b !important;
+    color: ${c.textMuted} !important;
     direction: ${dir};
   }
 
@@ -250,16 +332,30 @@ const buildPrintStyles = (meta) => {
     text-align: ${metaAlign};
     font-family: ${fontDisplay};
     font-size: ${isRtl ? '9pt' : '8pt'};
-    color: #475569 !important;
+    color: ${c.textMuted} !important;
     line-height: 1.8;
     direction: ${dir};
+  }
+
+  .prism-print-header__tool-tag {
+    display: inline-block;
+    background: ${ACCENT} !important;
+    color: #ffffff !important;
+    font-size: 8.5pt;
+    font-weight: 700;
+    padding: 3pt 10pt;
+    border-radius: 99pt;
+    margin-bottom: 4pt;
+    letter-spacing: 0.5pt;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .prism-print-header__meta strong {
     display: block;
     font-size: 10pt;
     font-weight: 700;
-    color: #0f172a !important;
+    color: ${c.textStrong} !important;
     margin-bottom: 3pt;
   }
 
@@ -275,7 +371,7 @@ const buildPrintStyles = (meta) => {
   #print-content h3,
   #print-content h4 {
     font-family: ${fontDisplay} !important;
-    color: #0f172a !important;
+    color: ${c.textStrong} !important;
     page-break-after: avoid;
     break-after: avoid;
     direction: ${dir};
@@ -288,41 +384,47 @@ const buildPrintStyles = (meta) => {
     font-weight: 800;
     margin-bottom: 10pt;
     padding-bottom: 6pt;
-    border-bottom: 2pt solid ${REPORT_CONFIG.accentColor};
+    border-bottom: 2pt solid ${ACCENT};
+    color: ${h1Color} !important;
   }
 
   #print-content h2 {
     font-size: 12.5pt;
     font-weight: 700;
-    margin-bottom: 8pt;
+    margin: 14pt 0 8pt;
     padding-bottom: 4pt;
-    border-bottom: 1pt solid #e2e8f0;
-    color: #1e3a8a !important;
+    border-bottom: 1pt solid ${c.border};
+    color: ${h2Color} !important;
   }
 
   #print-content h3 {
     font-size: 11pt;
     font-weight: 700;
-    margin-bottom: 6pt;
-    color: #1e40af !important;
+    margin: 10pt 0 6pt;
+    color: ${h3Color} !important;
   }
 
   #print-content h4 {
     font-size: 10pt;
     font-weight: 600;
     margin-bottom: 4pt;
+    color: ${c.text} !important;
   }
 
   #print-content p {
     margin: 0 0 8pt;
     direction: ${dir};
+    color: ${c.text} !important;
     orphans: 3;
     widows: 3;
   }
 
+  #print-content strong { color: ${c.textStrong} !important; }
+  #print-content em     { color: ${c.text} !important; }
+
   /* ── Links ──────────────────────────────────────── */
   #print-content a {
-    color: ${REPORT_CONFIG.accentColor} !important;
+    color: ${ACCENT} !important;
     text-decoration: underline;
     word-break: break-all;
     direction: ltr;
@@ -332,7 +434,7 @@ const buildPrintStyles = (meta) => {
   #print-content a[href]::after {
     content: " (" attr(href) ")";
     font-size: 7.5pt;
-    color: #94a3b8 !important;
+    color: ${c.textSubtle} !important;
     direction: ltr;
     unicode-bidi: embed;
   }
@@ -344,7 +446,11 @@ const buildPrintStyles = (meta) => {
     padding-${blockStart}: 16pt;
     padding-${blockEnd}: 0;
     margin: 0 0 8pt;
+    color: ${c.text};
   }
+
+  #print-content ul li::marker { color: ${ACCENT}; }
+  #print-content ol li::marker { color: ${ACCENT}; font-weight: 700; }
 
   #print-content li {
     margin-bottom: 3pt;
@@ -368,12 +474,10 @@ const buildPrintStyles = (meta) => {
     direction: ${dir};
   }
 
-  #print-content thead {
-    display: table-header-group;
-  }
+  #print-content thead { display: table-header-group; }
 
   #print-content thead th {
-    background: ${REPORT_CONFIG.accentColor} !important;
+    background: ${ACCENT} !important;
     color: #ffffff !important;
     font-family: ${fontDisplay};
     font-size: 9pt;
@@ -385,16 +489,17 @@ const buildPrintStyles = (meta) => {
   }
 
   #print-content tbody tr:nth-child(even) td {
-    background: #f8fafc !important;
+    background: ${c.stripeBg} !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
   #print-content td {
     padding: 5pt 8pt;
-    border-bottom: 0.5pt solid #e2e8f0;
+    border-bottom: 0.5pt solid ${c.border};
     vertical-align: top;
     text-align: ${blockStart};
+    color: ${c.text} !important;
   }
 
   #print-content tr {
@@ -407,9 +512,9 @@ const buildPrintStyles = (meta) => {
   #print-content code {
     font-family: 'Courier New', 'Consolas', monospace;
     font-size: 8.5pt;
-    background: #f1f5f9 !important;
-    color: #1e293b !important;
-    border: 0.5pt solid #cbd5e1;
+    background: ${c.codeBg} !important;
+    color: ${c.codeText} !important;
+    border: 0.5pt solid ${c.codeBorder};
     border-radius: 3pt;
     padding: 2pt 5pt;
     page-break-inside: avoid;
@@ -433,9 +538,9 @@ const buildPrintStyles = (meta) => {
     margin: 0 0 10pt;
     margin-${blockStart}: 12pt;
     padding: 7pt 12pt;
-    border-${blockStart}: 3pt solid ${REPORT_CONFIG.accentColor};
-    background: #eff6ff !important;
-    color: #1e3a8a !important;
+    border-${blockStart}: 3pt solid ${ACCENT};
+    background: ${c.quoteBg} !important;
+    color: ${c.quoteText} !important;
     font-style: ${isRtl ? 'normal' : 'italic'};
     page-break-inside: avoid;
     break-inside: avoid;
@@ -457,9 +562,9 @@ const buildPrintStyles = (meta) => {
     print-color-adjust: exact;
   }
 
-  .prism-score-chip.safe    { background: #dcfce7 !important; color: ${REPORT_CONFIG.successColor} !important; }
-  .prism-score-chip.warning { background: #fef9c3 !important; color: ${REPORT_CONFIG.warningColor} !important; }
-  .prism-score-chip.danger  { background: #fee2e2 !important; color: ${REPORT_CONFIG.dangerColor}  !important; }
+  .prism-score-chip.safe    { background: ${isDark ? 'rgba(34,197,94,0.18)'  : '#dcfce7'} !important; color: ${isDark ? '#86efac' : REPORT_CONFIG.successColor} !important; }
+  .prism-score-chip.warning { background: ${isDark ? 'rgba(234,179,8,0.18)'  : '#fef9c3'} !important; color: ${isDark ? '#fde047' : REPORT_CONFIG.warningColor} !important; }
+  .prism-score-chip.danger  { background: ${isDark ? 'rgba(239,68,68,0.18)'  : '#fee2e2'} !important; color: ${isDark ? '#fca5a5' : REPORT_CONFIG.dangerColor}  !important; }
 
   /* ── Word chips (Bias detected terms) ──────────── */
   .prism-word-chip {
@@ -467,9 +572,9 @@ const buildPrintStyles = (meta) => {
     padding: 2pt 7pt !important;
     margin: 1pt 2pt !important;
     border-radius: 4pt !important;
-    background: #fee2e2 !important;
-    color: ${REPORT_CONFIG.dangerColor} !important;
-    border: 0.5pt solid #fecaca !important;
+    background: ${isDark ? 'rgba(239,68,68,0.15)' : '#fee2e2'} !important;
+    color: ${isDark ? '#fca5a5' : REPORT_CONFIG.dangerColor} !important;
+    border: 0.5pt solid ${isDark ? 'rgba(239,68,68,0.30)' : '#fecaca'} !important;
     font-size: 8.5pt !important;
     font-weight: 600 !important;
     direction: ${dir};
@@ -483,8 +588,8 @@ const buildPrintStyles = (meta) => {
     align-items: center;
     justify-content: space-between;
     gap: 12pt;
-    background: #f8fafc !important;
-    border: 0.75pt solid #e2e8f0;
+    background: ${c.panelBg} !important;
+    border: 0.75pt solid ${c.border};
     border-radius: 6pt;
     padding: 12pt 14pt;
     margin: 0 0 14pt;
@@ -501,15 +606,15 @@ const buildPrintStyles = (meta) => {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1pt;
-    color: #64748b !important;
+    color: ${c.textSubtle} !important;
     margin-bottom: 2pt;
   }
   .prism-kpi__value {
     font-family: ${fontDisplay};
-    font-size: 22pt;
+    font-size: 24pt;
     font-weight: 900;
     line-height: 1;
-    color: #0f172a !important;
+    color: ${c.textStrong} !important;
   }
   .prism-kpi__bar {
     flex: 1;
@@ -526,9 +631,10 @@ const buildPrintStyles = (meta) => {
     top: -3pt;
     width: 3pt;
     height: 16pt;
-    background: #0f172a !important;
+    background: ${c.textStrong} !important;
     border-radius: 1pt;
     transform: translateX(-50%);
+    box-shadow: 0 0 0 1.5pt ${c.bg};
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -569,18 +675,18 @@ const buildPrintStyles = (meta) => {
   .prism-status-banner__sub {
     font-family: ${fontDisplay};
     font-size: 8.5pt;
-    color: #64748b !important;
+    color: ${c.textMuted} !important;
     margin-top: 2pt;
   }
-  .prism-status-banner.safe    { background: #f0fdf4 !important; border-color: #bbf7d0 !important; }
+  .prism-status-banner.safe    { background: ${isDark ? 'rgba(34,197,94,0.10)' : '#f0fdf4'} !important; border-color: ${isDark ? 'rgba(34,197,94,0.35)' : '#bbf7d0'} !important; }
   .prism-status-banner.safe    .prism-status-banner__icon  { background: ${REPORT_CONFIG.successColor} !important; }
-  .prism-status-banner.safe    .prism-status-banner__label { color: ${REPORT_CONFIG.successColor} !important; }
-  .prism-status-banner.warning { background: #fefce8 !important; border-color: #fde68a !important; }
+  .prism-status-banner.safe    .prism-status-banner__label { color: ${isDark ? '#86efac' : REPORT_CONFIG.successColor} !important; }
+  .prism-status-banner.warning { background: ${isDark ? 'rgba(234,179,8,0.10)' : '#fefce8'} !important; border-color: ${isDark ? 'rgba(234,179,8,0.35)' : '#fde68a'} !important; }
   .prism-status-banner.warning .prism-status-banner__icon  { background: ${REPORT_CONFIG.warningColor} !important; }
-  .prism-status-banner.warning .prism-status-banner__label { color: ${REPORT_CONFIG.warningColor} !important; }
-  .prism-status-banner.danger  { background: #fef2f2 !important; border-color: #fecaca !important; }
+  .prism-status-banner.warning .prism-status-banner__label { color: ${isDark ? '#fde047' : REPORT_CONFIG.warningColor} !important; }
+  .prism-status-banner.danger  { background: ${isDark ? 'rgba(239,68,68,0.10)' : '#fef2f2'} !important; border-color: ${isDark ? 'rgba(239,68,68,0.35)' : '#fecaca'} !important; }
   .prism-status-banner.danger  .prism-status-banner__icon  { background: ${REPORT_CONFIG.dangerColor} !important; }
-  .prism-status-banner.danger  .prism-status-banner__label { color: ${REPORT_CONFIG.dangerColor} !important; }
+  .prism-status-banner.danger  .prism-status-banner__label { color: ${isDark ? '#fca5a5' : REPORT_CONFIG.dangerColor} !important; }
 
   /* ── Two-column grid for fallacies/questions ────── */
   .prism-grid-2 {
@@ -590,9 +696,7 @@ const buildPrintStyles = (meta) => {
     margin: 0 0 12pt;
     direction: ${dir};
   }
-  .prism-grid-2 > .prism-card {
-    margin-bottom: 0 !important;
-  }
+  .prism-grid-2 > .prism-card { margin-bottom: 0 !important; }
 
   /* ── Section title above visuals ────────────────── */
   .prism-section-title {
@@ -601,7 +705,7 @@ const buildPrintStyles = (meta) => {
     font-weight: 800 !important;
     text-transform: uppercase;
     letter-spacing: 1.5pt;
-    color: #475569 !important;
+    color: ${c.textSubtle} !important;
     margin: 0 0 6pt !important;
     padding: 0 !important;
     border: none !important;
@@ -610,52 +714,90 @@ const buildPrintStyles = (meta) => {
 
   /* ── Quoted analysis paragraph ──────────────────── */
   .prism-analysis-quote {
-    border-${blockStart}: 2pt solid ${REPORT_CONFIG.accentColor};
+    border-${blockStart}: 2pt solid ${ACCENT};
     padding: 4pt 0 4pt 10pt;
     padding-${blockEnd}: 0;
     padding-${blockStart}: 10pt;
     margin: 8pt 0 0;
     font-size: 10pt;
-    color: #334155 !important;
+    color: ${c.textMuted} !important;
     line-height: 1.6;
     direction: ${dir};
   }
 
-  /* ── Progress / bias bars ───────────────────────── */
-  .prism-bias-bar-wrap {
-    background: #e2e8f0 !important;
-    border-radius: 99pt;
-    height: 7pt;
-    width: 100%;
-    margin: 4pt 0 8pt;
-    overflow: hidden;
-    direction: ltr;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .prism-bias-bar-fill {
-    height: 100%;
-    border-radius: 99pt;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  /* ── Section cards (if used) ────────────────────── */
+  /* ── Section cards (info, lists) ────────────────── */
   .prism-card {
-    border: 0.75pt solid #e2e8f0;
-    border-radius: 4pt;
-    padding: 10pt 12pt;
+    border: 0.75pt solid ${c.border};
+    border-radius: 5pt;
+    padding: 12pt 14pt;
     margin-bottom: 10pt;
     page-break-inside: avoid;
     break-inside: avoid;
-    background: #ffffff !important;
+    background: ${c.cardBg} !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
+  .prism-card * { color: ${c.text} !important; }
+  .prism-card .prism-section-title { color: ${c.textSubtle} !important; }
+
+  /* ── Recycle: per-platform branded cards ────────── */
+  .prism-platform-card {
+    border: 0.75pt solid ${c.border};
+    border-${blockStart}: 4pt solid;
+    border-radius: 5pt;
+    padding: 12pt 14pt;
+    margin-bottom: 12pt;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    background: ${c.cardBg} !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .prism-platform-card[data-platform="x"]         { border-${blockStart}-color: #0f1419 !important; }
+  .prism-platform-card[data-platform="linkedin"]  { border-${blockStart}-color: #0a66c2 !important; }
+  .prism-platform-card[data-platform="instagram"] { border-${blockStart}-color: #ee2a7b !important; }
+  .prism-platform-card[data-platform="facebook"]  { border-${blockStart}-color: #1877f2 !important; }
+
+  .prism-platform-card__head {
+    display: flex !important;
+    align-items: center;
+    gap: 8pt;
+    margin: 0 0 8pt;
+    padding-bottom: 6pt;
+    border-bottom: 0.5pt solid ${c.border};
+    direction: ${dir};
+  }
+  .prism-platform-card__chip {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 5pt;
+    padding: 3pt 9pt;
+    border-radius: 99pt;
+    font-family: ${fontDisplay};
+    font-size: 9pt;
+    font-weight: 800;
+    color: #ffffff !important;
+    letter-spacing: 0.3pt;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .prism-platform-card[data-platform="x"]         .prism-platform-card__chip { background: #0f1419 !important; }
+  .prism-platform-card[data-platform="linkedin"]  .prism-platform-card__chip { background: #0a66c2 !important; }
+  .prism-platform-card[data-platform="instagram"] .prism-platform-card__chip { background: linear-gradient(135deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%) !important; }
+  .prism-platform-card[data-platform="facebook"]  .prism-platform-card__chip { background: #1877f2 !important; }
+
+  .prism-platform-card__body {
+    direction: ${dir};
+  }
+  .prism-platform-card__body * { color: ${c.text} !important; }
+  .prism-platform-card__body p { margin: 0 0 6pt; }
+  .prism-platform-card__body h3,
+  .prism-platform-card__body h4 { display: none; }
 
   /* ── Divider ────────────────────────────────────── */
   .prism-divider, hr {
     border: none;
-    border-top: 0.75pt solid #e2e8f0;
+    border-top: 0.75pt solid ${c.border};
     margin: 12pt 0;
   }
 
@@ -666,22 +808,24 @@ const buildPrintStyles = (meta) => {
     margin-bottom: 10pt;
     page-break-inside: avoid;
     break-inside: avoid;
+    background: ${ACCENT_SOFT};
+    color: ${isDark ? c.text : ACCENT_DEEP} !important;
+    border-${blockStart}: 3pt solid ${ACCENT};
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .prism-callout.info    { background: #eff6ff !important; border-${blockStart}: 3pt solid ${REPORT_CONFIG.accentColor}; }
-  .prism-callout.warning { background: #fffbeb !important; border-${blockStart}: 3pt solid ${REPORT_CONFIG.warningColor}; }
-  .prism-callout.danger  { background: #fef2f2 !important; border-${blockStart}: 3pt solid ${REPORT_CONFIG.dangerColor}; }
+  .prism-callout.warning { background: ${isDark ? 'rgba(234,179,8,0.10)' : '#fffbeb'} !important; border-${blockStart}: 3pt solid ${REPORT_CONFIG.warningColor}; color: ${isDark ? '#fde047' : '#78350f'} !important; }
+  .prism-callout.danger  { background: ${isDark ? 'rgba(239,68,68,0.10)' : '#fef2f2'} !important; border-${blockStart}: 3pt solid ${REPORT_CONFIG.dangerColor};  color: ${isDark ? '#fca5a5' : '#7f1d1d'} !important; }
 
   /* ── End-of-document footer (last page only) ────── */
   .prism-print-footer {
     margin-top: 24pt;
     padding-top: 8pt;
-    border-top: 0.75pt solid #e2e8f0;
+    border-top: 0.75pt solid ${c.border};
     text-align: center;
     font-family: ${fontDisplay};
     font-size: 7.5pt;
-    color: #94a3b8 !important;
+    color: ${c.textSubtle} !important;
     direction: ${dir};
     page-break-inside: avoid;
     break-inside: avoid;
@@ -689,13 +833,13 @@ const buildPrintStyles = (meta) => {
   }
 
   .prism-print-footer__text { display: block; }
+  .prism-print-footer__brand { color: ${ACCENT} !important; font-weight: 700; letter-spacing: 1pt; }
 
   /* ── Page-break utilities ───────────────────────── */
   .page-break-before { page-break-before: always; break-before: page; }
   .page-break-after  { page-break-after: always;  break-after: page; }
   .no-break          { page-break-inside: avoid;  break-inside: avoid; }
 
-  /* ── Spacing helpers ────────────────────────────── */
   .print-mt-0 { margin-top: 0 !important; }
   .print-mb-0 { margin-bottom: 0 !important; }
 
@@ -707,7 +851,7 @@ const buildPrintStyles = (meta) => {
 // ─── 6. DOM HELPERS ──────────────────────────────────────────
 
 const buildPrintHeader = (meta) => {
-  const { dir, isRtl, t, date, time, toolLabel } = meta;
+  const { isRtl, t, date, time, toolLabel } = meta;
 
   const dateTimeHtml = isRtl
     ? `${t.dateLabel}: ${date} &nbsp;·&nbsp; ${t.timeLabel}: ${time}`
@@ -721,7 +865,8 @@ const buildPrintHeader = (meta) => {
       <span class="prism-print-header__tagline">${t.tagline}</span>
     </div>
     <div class="prism-print-header__meta">
-      <strong>${toolLabel}</strong>
+      <span class="prism-print-header__tool-tag">${toolLabel}</span>
+      <strong>${t.dateLabel}</strong>
       ${dateTimeHtml}
     </div>
   `;
@@ -732,7 +877,7 @@ const buildPrintFooter = (meta) => {
   const { t } = meta;
   const footer = document.createElement('div');
   footer.className = 'prism-print-footer';
-  footer.innerHTML = `<span class="prism-print-footer__text">${t.footerText}</span>`;
+  footer.innerHTML = `<span class="prism-print-footer__text">${t.footerText.replace(REPORT_CONFIG.brandName, `<span class="prism-print-footer__brand">${REPORT_CONFIG.brandName}</span>`)}</span>`;
   return footer;
 };
 

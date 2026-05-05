@@ -12,10 +12,13 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; color: #0f172a; overflow-x: hidden; transition: background-color 0.3s, color 0.3s; }
+        html[lang="en"] body { font-family: 'Inter', system-ui, -apple-system, sans-serif; letter-spacing: -0.011em; }
+        html[lang="en"] h1, html[lang="en"] h2, html[lang="en"] h3, html[lang="en"] h4 { letter-spacing: -0.02em; }
         .dark body { background-color: #020617; color: #f8fafc; }
         
         ::-webkit-scrollbar { width: 6px; }
@@ -179,6 +182,92 @@
         .fav-star { transition: all 0.15s; cursor: pointer; }
         .fav-star.is-fav { color: #eab308; fill: #eab308; }
         .fav-star:hover { transform: scale(1.15); }
+
+        /* ─── Brand-colored platform pills ───────────────── */
+        .platform-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 9999px;
+            font-size: 11px; font-weight: 700; letter-spacing: 0.01em;
+            border: 1px solid #e2e8f0;
+            color: #64748b; background: #ffffff;
+            transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            user-select: none;
+        }
+        .dark .platform-pill { background: rgba(15,23,42,0.6); border-color: rgba(255,255,255,0.08); color: #94a3b8; }
+        .platform-pill svg { width: 12px; height: 12px; }
+        .platform-pill:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .peer:checked ~ .platform-pill { color: #fff; border-color: transparent; box-shadow: 0 4px 14px rgba(0,0,0,0.15); transform: translateY(-1px); }
+        .peer:checked ~ .platform-pill[data-platform="x"] { background: #0f1419; }
+        .peer:checked ~ .platform-pill[data-platform="linkedin"] { background: #0a66c2; box-shadow: 0 4px 14px rgba(10,102,194,0.35); }
+        .peer:checked ~ .platform-pill[data-platform="instagram"] { background: linear-gradient(135deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%); box-shadow: 0 4px 14px rgba(238,42,123,0.35); }
+        .peer:checked ~ .platform-pill[data-platform="facebook"] { background: #1877f2; box-shadow: 0 4px 14px rgba(24,119,242,0.35); }
+
+        /* ─── Tool-specific accent colors ────────────────── */
+        html .nav-item[data-endpoint="summarize"].active     { color: #2563eb; background: linear-gradient(var(--grad-dir, 270deg), rgba(59,130,246,0.08) 0%, transparent 100%); border-inline-start-color: #3b82f6 !important; }
+        html .nav-item[data-endpoint="bias"].active          { color: #d97706; background: linear-gradient(var(--grad-dir, 270deg), rgba(245,158,11,0.10) 0%, transparent 100%); border-inline-start-color: #f59e0b !important; }
+        html .nav-item[data-endpoint="recycle"].active       { color: #0d9488; background: linear-gradient(var(--grad-dir, 270deg), rgba(20,184,166,0.10) 0%, transparent 100%); border-inline-start-color: #14b8a6 !important; }
+        html .nav-item[data-endpoint="truth-guard"].active   { color: #059669; background: linear-gradient(var(--grad-dir, 270deg), rgba(16,185,129,0.10) 0%, transparent 100%); border-inline-start-color: #10b981 !important; }
+        html .nav-item[data-endpoint="synthesis"].active     { color: #7c3aed; background: linear-gradient(var(--grad-dir, 270deg), rgba(139,92,246,0.10) 0%, transparent 100%); border-inline-start-color: #8b5cf6 !important; }
+        html .nav-item[data-endpoint="audio-analysis"].active{ color: #db2777; background: linear-gradient(var(--grad-dir, 270deg), rgba(236,72,153,0.10) 0%, transparent 100%); border-inline-start-color: #ec4899 !important; }
+        html[dir="ltr"] .nav-item.active { --grad-dir: 90deg; }
+        html.dark .nav-item[data-endpoint="summarize"].active     { color: #93c5fd; }
+        html.dark .nav-item[data-endpoint="bias"].active          { color: #fbbf24; }
+        html.dark .nav-item[data-endpoint="recycle"].active       { color: #5eead4; }
+        html.dark .nav-item[data-endpoint="truth-guard"].active   { color: #6ee7b7; }
+        html.dark .nav-item[data-endpoint="synthesis"].active     { color: #c4b5fd; }
+        html.dark .nav-item[data-endpoint="audio-analysis"].active{ color: #f9a8d4; }
+
+        /* History filter chips inherit tool colors */
+        .history-filter-chip[data-filter="summarize"].active { background: #3b82f6; border-color: #3b82f6; }
+        .history-filter-chip[data-filter="bias"].active      { background: #f59e0b; border-color: #f59e0b; }
+        .history-filter-chip[data-filter="recycle"].active   { background: #14b8a6; border-color: #14b8a6; }
+        .history-filter-chip[data-filter="truthGuard"].active{ background: #10b981; border-color: #10b981; }
+        .history-filter-chip[data-filter="favorite"].active  { background: #eab308; border-color: #eab308; }
+
+        /* ─── Empty state for results ────────────────────── */
+        #empty-state:not(.hidden) {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 3rem 1.5rem; text-align: center;
+            border-radius: 1.25rem;
+            background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(248,250,252,0.3) 100%);
+            border: 1px dashed rgba(148,163,184,0.35);
+            animation: fadeInUp 0.5s ease-out;
+        }
+        .dark #empty-state:not(.hidden) {
+            background: linear-gradient(180deg, rgba(30,41,59,0.3) 0%, rgba(15,23,42,0.15) 100%);
+            border-color: rgba(255,255,255,0.08);
+        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .empty-icon-wrap {
+            width: 72px; height: 72px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(139,92,246,0.12));
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+        .empty-icon-wrap::after {
+            content: ''; position: absolute; inset: -6px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, transparent, rgba(59,130,246,0.25), transparent 60%);
+            animation: ringSpin 4s linear infinite;
+            z-index: -1;
+            filter: blur(4px);
+        }
+        @keyframes ringSpin { to { transform: rotate(360deg); } }
+
+        /* ─── Streaming cursor (live caret) ──────────────── */
+        #results-content.is-streaming > *:last-child::after {
+            content: '';
+            display: inline-block;
+            width: 2px; height: 1em;
+            background: currentColor;
+            margin-inline-start: 4px;
+            vertical-align: -0.15em;
+            animation: caretBlink 1s steps(1) infinite;
+            opacity: 0.7;
+        }
+        @keyframes caretBlink { 50% { opacity: 0; } }
     </style>
     <!-- Pre-load theme & language (defaults: dark + en) -->
     <script>
@@ -344,15 +433,31 @@
                         <div class="flex items-center gap-2 flex-wrap" id="platforms-container">
                             <label class="cursor-pointer">
                                 <input type="checkbox" value="X (Twitter)" class="peer hidden opt-rec-platform-cb" checked>
-                                <div class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-500 dark:text-slate-400 peer-checked:bg-slate-900 peer-checked:border-slate-900 peer-checked:text-white dark:peer-checked:bg-white dark:peer-checked:text-slate-900 transition-all shadow-sm select-none">X (Twitter)</div>
+                                <span class="platform-pill" data-platform="x">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                    X (Twitter)
+                                </span>
                             </label>
                             <label class="cursor-pointer">
                                 <input type="checkbox" value="LinkedIn" class="peer hidden opt-rec-platform-cb" checked>
-                                <div class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-500 dark:text-slate-400 peer-checked:bg-slate-900 peer-checked:border-slate-900 peer-checked:text-white dark:peer-checked:bg-white dark:peer-checked:text-slate-900 transition-all shadow-sm select-none">LinkedIn</div>
+                                <span class="platform-pill" data-platform="linkedin">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                                    LinkedIn
+                                </span>
                             </label>
                             <label class="cursor-pointer">
                                 <input type="checkbox" value="Instagram" class="peer hidden opt-rec-platform-cb">
-                                <div class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-500 dark:text-slate-400 peer-checked:bg-slate-900 peer-checked:border-slate-900 peer-checked:text-white dark:peer-checked:bg-white dark:peer-checked:text-slate-900 transition-all shadow-sm select-none">Instagram</div>
+                                <span class="platform-pill" data-platform="instagram">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                                    Instagram
+                                </span>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="checkbox" value="Facebook" class="peer hidden opt-rec-platform-cb">
+                                <span class="platform-pill" data-platform="facebook">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                                    Facebook
+                                </span>
                             </label>
                         </div>
                         <select id="opt-rec-tone" class="form-select text-sm py-2 px-4 rounded-lg font-medium">
@@ -424,6 +529,17 @@
                         </button>
                     </div>
                 </div>
+            </div>
+
+            <!-- Empty state (shown before first analysis) -->
+            <div id="empty-state" class="mb-10">
+                <div class="empty-icon-wrap">
+                    <svg class="w-9 h-9 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                </div>
+                <h3 data-i18n="empty.title" class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-200 mb-1.5">جاهز للتحليل</h3>
+                <p data-i18n="empty.desc" class="text-sm text-slate-500 dark:text-slate-400 max-w-md leading-relaxed">الصق نصاً أو رابطاً في المحرر أعلاه، اختر إعداداتك، ثم اضغط <kbd class="px-1.5 py-0.5 mx-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono">Ctrl + Enter</kbd> لبدء التحليل.</p>
             </div>
 
             <!-- Skeleton Loader -->

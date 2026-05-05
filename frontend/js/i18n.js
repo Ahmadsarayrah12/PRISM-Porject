@@ -92,7 +92,9 @@ export const translations = {
         "bias.neutral.rewrite": "إعادة الكتابة المحايدة",
         "truth.fallacies": "المغالطات المكتشفة",
         "truth.questions": "أسئلة التحقيق",
-        "truth.recommendations": "التوصيات"
+        "truth.recommendations": "التوصيات",
+        "empty.title": "جاهز للتحليل",
+        "empty.desc": "الصق نصاً أو رابطاً في المحرر أعلاه، اختر إعداداتك، ثم اضغط <kbd class=\"px-1.5 py-0.5 mx-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono\">Ctrl + Enter</kbd> لبدء التحليل."
     },
     en: {
         "page.home.title": "Prism | Smart Media Platform",
@@ -187,7 +189,9 @@ export const translations = {
         "bias.neutral.rewrite": "Neutral Rewrite",
         "truth.fallacies": "Detected Fallacies",
         "truth.questions": "Investigation Prompts",
-        "truth.recommendations": "Recommendations"
+        "truth.recommendations": "Recommendations",
+        "empty.title": "Ready when you are",
+        "empty.desc": "Paste text or a URL in the editor above, pick your options, then hit <kbd class=\"px-1.5 py-0.5 mx-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono\">Ctrl + Enter</kbd> to start analysis."
     }
 };
 
